@@ -74,6 +74,7 @@ export default function Admin() {
   const [form, setForm] = useState(emptyForm);
   const [menuFiles, setMenuFiles] = useState([]);
   const [paymentQrFile, setPaymentQrFile] = useState(null);
+  const [logoFile, setLogoFile] = useState(null);
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
   const [copied, setCopied] = useState("");
@@ -167,6 +168,14 @@ export default function Admin() {
       }
 
       let paymentQrUrl = null;
+      let logoUrl = form.logo_url?.trim() || null;
+
+      if (logoFile) {
+        const compressedLogo = await compressImage(logoFile, { maxDimension: 800, quality: 0.86 });
+        const path = `business/${created.id}/logo-${Date.now()}.webp`;
+        logoUrl = await uploadMedia(compressedLogo, path);
+        uploadedPaths.push(path);
+      }
       if (paymentQrFile) {
         const compressedQr = await compressImage(paymentQrFile, { maxDimension: 1000, quality: 0.88 });
         const path = `business/${created.id}/payment-qr-${Date.now()}.webp`;
@@ -177,11 +186,13 @@ export default function Admin() {
       await updateBusiness(created.id, {
         menu_images: menuUrls,
         payment_qr_url: paymentQrUrl,
+        logo_url: logoUrl,
       });
 
       setForm(emptyForm);
       setMenuFiles([]);
       setPaymentQrFile(null);
+      setLogoFile(null);
       setStatus(`Created ${created.business_name}.`);
       await loadBusinesses();
     } catch (err) {
@@ -207,7 +218,7 @@ export default function Admin() {
     setStatus("");
     try {
       const menuUrls = Array.isArray(business.menu_images) ? business.menu_images : [];
-      const mediaUrls = [...menuUrls, business.payment_qr_url].filter(Boolean);
+      const mediaUrls = [...menuUrls, business.payment_qr_url, business.logo_url].filter(Boolean);
       for (const url of mediaUrls) {
         const path = getMediaPathFromPublicUrl(url);
         if (path) await deleteMedia(path).catch(() => {});
@@ -276,7 +287,12 @@ export default function Admin() {
                 <label>Facebook<input value={form.facebook} onChange={handleChange("facebook")} placeholder="Optional" /></label>
                 <label>LinkedIn<input value={form.linkedin} onChange={handleChange("linkedin")} placeholder="Optional" /></label>
               </div>
-              <label>Logo URL <span className="admin-muted">optional for now</span><input value={form.logo_url} onChange={handleChange("logo_url")} placeholder="https://.../logo.png" /></label>
+              <div className="admin-upload-box">
+                <div className="admin-upload-heading"><FaUpload /><div><strong>Business Logo</strong><span>Upload the business logo. Haki compresses it before storing it.</span></div></div>
+                <label className="admin-upload-button"><FaUpload /> {logoFile ? "Change business logo" : "Upload business logo"}<input type="file" accept="image/*" onChange={(e) => setLogoFile(e.target.files?.[0] || null)} /></label>
+                {logoFile && <div className="admin-file"><span>{logoFile.name}</span><button type="button" onClick={() => setLogoFile(null)}><FaTrash /></button></div>}
+                <label>Or use a direct image URL <span className="admin-muted">optional</span><input value={form.logo_url} onChange={handleChange("logo_url")} placeholder="https://.../logo.png" /></label>
+              </div>
 
               <div className="admin-preview-url"><span>Profile URL</span><code>/p/{slug || "business-name"}</code></div>
               {status && <div className="admin-success"><FaCheck /> {status}</div>}
