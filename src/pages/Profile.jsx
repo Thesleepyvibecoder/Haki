@@ -177,7 +177,7 @@ export default function Profile({ slug }) {
   return (
     <main className="profile-page">
       <div className="profile-card">
-        <img className="profile-haki-logo" src="/haki-logo.png" alt="Haki" />
+        <img className="profile-haki-logo" src="/haki-logo-light.png" alt="Haki" />
         <div className="profile-avatar-wrap">
           {business.logo_url ? (
             <img className="profile-avatar" src={business.logo_url} alt="" />
