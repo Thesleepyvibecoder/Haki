@@ -19,20 +19,33 @@ import { getBusinessBySlug, supabaseConfigured, trackEvent } from "../lib/supaba
 import "./Profile.css";
 
 const coreLinks = [
-  ["phone", "Call", FaPhone],
-  ["instagram", "Instagram", FaInstagram],
-  ["website", "Website", FaGlobe],
-  ["google_review_url", "Google Review", FaStar],
-  ["whatsapp", "WhatsApp", FaWhatsapp],
-  ["booking_url", "Booking", FaCalendarAlt],
-  ["facebook", "Facebook", FaFacebookF],
-  ["linkedin", "LinkedIn", FaLinkedinIn],
+  ["phone", "Call", FaPhone], ["instagram", "Instagram", FaInstagram], ["website", "Website", FaGlobe],
+  ["google_review_url", "Google Review", FaStar], ["whatsapp", "WhatsApp", FaWhatsapp], ["booking_url", "Booking", FaCalendarAlt],
+  ["facebook", "Facebook", FaFacebookF], ["linkedin", "LinkedIn", FaLinkedinIn],
 ];
+
+const moduleIcons = {
+  call: FaPhone, whatsapp: FaWhatsapp, instagram: FaInstagram, website: FaGlobe,
+  google_review: FaStar, booking: FaCalendarAlt, facebook: FaFacebookF, linkedin: FaLinkedinIn,
+  email: FaRegAddressCard, menu: FaUtensils, payment: FaQrcode, custom: FaGlobe,
+};
+
+function getModules(business) {
+  if (!Array.isArray(business.modules)) return [];
+  return business.modules.filter((module) => module && module.enabled !== false && module.type && module.label);
+}
+
+function moduleAnalyticsKey(module) {
+  const slug = String(module.label || module.type).toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "").slice(0, 50);
+  return `module_${slug || module.type}_click`;
+}
+
 
 function normalizeLink(type, value) {
   if (!value) return null;
   if (type === "phone") return `tel:${value.replace(/[^+\d]/g, "")}`;
   if (type === "whatsapp") return `https://wa.me/${value.replace(/[^\d]/g, "")}`;
+  if (type === "email") return `mailto:${value.trim()}`;
   if (/^https?:\/\//i.test(value)) return value;
   return `https://${value}`;
 }
@@ -93,6 +106,7 @@ export default function Profile({ slug }) {
   }, [slug]);
 
   const menuImages = useMemo(() => business ? getMenuImages(business) : [], [business]);
+  const configuredModules = useMemo(() => business ? getModules(business) : [], [business]);
   const upiUrl = useMemo(() => business ? buildUpiUrl(business) : null, [business]);
   const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
 
@@ -101,12 +115,18 @@ export default function Profile({ slug }) {
   if (status === "not-found") return <div className="profile-state"><h1>Profile not found</h1><p>This Haki profile doesn't exist or is inactive.</p></div>;
   if (status === "error") return <div className="profile-state"><h1>Something went wrong</h1><p>Please try again in a moment.</p></div>;
 
-  const links = coreLinks
-    .map(([key, label, Icon]) => ({ key, label, Icon, value: business[key], href: normalizeLink(key, business[key]) }))
-    .filter((item) => item.href);
+  const links = configuredModules.length > 0
+    ? configuredModules.map((module) => {
+        const Icon = moduleIcons[module.type] || FaGlobe;
+        if (module.type === "menu" || module.type === "payment") return { ...module, key: module.type, Icon, href: null };
+        const value = module.type === "call" ? business.phone : module.type === "email" ? business.email : module.value;
+        return { ...module, key: module.type, Icon, href: normalizeLink(module.type === "google_review" ? "google_review_url" : module.type, value) };
+      }).filter((item) => (item.type === "menu" && menuImages.length > 0) || (item.type === "payment" && (business.upi_id || business.payment_qr_url)) || item.href)
+    : coreLinks.map(([key, label, Icon]) => ({ key, label, Icon, value: business[key], href: normalizeLink(key, business[key]), type: key }))
+      .filter((item) => item.href);
 
-  if (menuImages.length > 0) {
-    links.splice(1, 0, { key: "menu", label: "Menu", Icon: FaUtensils, href: null });
+  if (configuredModules.length === 0 && menuImages.length > 0) {
+    links.splice(1, 0, { key: "menu", type: "menu", label: "Menu", Icon: FaUtensils, href: null });
   }
 
   const saveContact = async () => {
@@ -136,7 +156,12 @@ export default function Profile({ slug }) {
       setMenuOpen(true);
       return;
     }
-    await trackEvent(business.id, `${item.key}_click`).catch(() => {});
+    if (item.key === "payment") {
+      await openPayment();
+      return;
+    }
+    const eventType = item.id ? moduleAnalyticsKey(item) : `${item.key}_click`;
+    await trackEvent(business.id, eventType).catch(() => {});
     window.location.href = item.href;
   };
 
@@ -144,7 +169,7 @@ export default function Profile({ slug }) {
     await trackEvent(business.id, "payment_click").catch(() => {});
     setPaymentAmount("");
     setPaymentError("");
-    setShowPaymentQr(isIOS);
+    setShowPaymentQr(isIOS || !business.upi_id);
     setPaymentOpen(true);
   };
 
@@ -205,7 +230,7 @@ export default function Profile({ slug }) {
           ))}
         </div>
 
-        {(upiUrl || business.payment_qr_url) && (
+        {(upiUrl || business.payment_qr_url) && (configuredModules.length === 0 || configuredModules.some((module) => module.type === "payment")) && (
           <section className="profile-payment">
             <div className="profile-divider" />
             <div className="profile-payment-heading"><FaQrcode /><div><strong>Pay</strong><span>Secure UPI payment</span></div></div>

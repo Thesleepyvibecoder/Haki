@@ -4,15 +4,19 @@ import { getAnalyticsByToken, supabaseConfigured } from "../lib/supabaseRest";
 import "./Analytics.css";
 
 const labels = {
-  whatsapp_click: "WhatsApp",
-  phone_click: "Phone",
-  instagram_click: "Instagram",
-  facebook_click: "Facebook",
-  linkedin_click: "LinkedIn",
-  website_click: "Website",
-  email_click: "Email",
-  save_contact: "Save Contact",
+  whatsapp_click: "WhatsApp", phone_click: "Phone", instagram_click: "Instagram",
+  facebook_click: "Facebook", linkedin_click: "LinkedIn", website_click: "Website",
+  email_click: "Email", save_contact: "Save Contact", menu_click: "Menu", payment_click: "Payment", upi_app_click: "UPI App",
 };
+
+function prettyEvent(key) {
+  if (labels[key]) return labels[key];
+  if (key.startsWith("module_") && key.endsWith("_click")) {
+    return key.slice(7, -5).split("_").filter(Boolean).map((word) => word.charAt(0).toUpperCase() + word.slice(1)).join(" ");
+  }
+  return key.replace(/_click$/, "").split("_").filter(Boolean).map((word) => word.charAt(0).toUpperCase() + word.slice(1)).join(" ");
+}
+
 
 const formatDate = (date) => date.toLocaleDateString("en-IN", { day: "numeric", month: "short" });
 
@@ -36,9 +40,11 @@ export default function Analytics({ token }) {
   const counts = data.counts || {};
   const chart = data.daily || [];
   const maxDaily = Math.max(...chart.map((item) => Number(item.views || 0) + Number(item.interactions || 0)), 1);
-  const ordered = Object.entries(labels)
-    .map(([key, label]) => [label, Number(counts[key] || 0)])
-    .filter(([, value]) => value > 0);
+  const ordered = Object.entries(counts)
+    .filter(([key]) => key !== "profile_view")
+    .map(([key, value]) => [prettyEvent(key), Number(value || 0)])
+    .filter(([, value]) => value > 0)
+    .sort((a, b) => b[1] - a[1]);
 
   return (
     <main className="analytics-page">
