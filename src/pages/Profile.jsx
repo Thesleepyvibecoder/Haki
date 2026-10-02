@@ -18,6 +18,13 @@ import {
 import { getBusinessBySlug, supabaseConfigured, trackEvent } from "../lib/supabaseRest";
 import "./Profile.css";
 
+const DEFAULT_THEME = { backgroundMode:"solid", background:"#f3eadf", background2:"#fffaf3", gradientAngle:180, textPrimary:"#2b1c14", textSecondary:"#806c5e", accent:"#925332", buttonBackground:"#925332", buttonText:"#fffaf5", buttonBorder:"#8a4c2d", buttonStyle:"solid", radius:14, cardBackground:"#fffaf3", cardBorder:"#dfcbb7", cardOpacity:1 };
+
+function getTheme(business) {
+  const saved = business?.profile_theme && typeof business.profile_theme === "object" ? business.profile_theme : {};
+  return { ...DEFAULT_THEME, ...saved };
+}
+
 const coreLinks = [
   ["phone", "Call", FaPhone], ["instagram", "Instagram", FaInstagram], ["website", "Website", FaGlobe],
   ["google_review_url", "Google Review", FaStar], ["whatsapp", "WhatsApp", FaWhatsapp], ["booking_url", "Booking", FaCalendarAlt],
@@ -107,6 +114,7 @@ export default function Profile({ slug }) {
 
   const menuImages = useMemo(() => business ? getMenuImages(business) : [], [business]);
   const configuredModules = useMemo(() => business ? getModules(business) : [], [business]);
+  const theme = useMemo(() => getTheme(business), [business]);
   const upiUrl = useMemo(() => business ? buildUpiUrl(business) : null, [business]);
   const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
 
@@ -199,10 +207,26 @@ export default function Profile({ slug }) {
     setTouchStartX(null);
   };
 
+  const profileStyle = {
+    "--profile-bg": theme.background,
+    "--profile-bg-2": theme.background2,
+    "--profile-angle": `${theme.gradientAngle || 180}deg`,
+    "--profile-text": theme.textPrimary,
+    "--profile-muted": theme.textSecondary,
+    "--profile-accent": theme.accent,
+    "--profile-button-bg": theme.buttonBackground,
+    "--profile-button-text": theme.buttonText,
+    "--profile-button-border": theme.buttonBorder,
+    "--profile-radius": `${theme.radius || 14}px`,
+    "--profile-card-bg": theme.cardBackground,
+    "--profile-card-border": theme.cardBorder,
+    "--profile-card-opacity": theme.cardOpacity ?? 1,
+  };
+
   return (
-    <main className="profile-page">
+    <main className="profile-page" style={profileStyle}>
       <div className="profile-card">
-        <img className="profile-haki-logo" src="/haki-logo-light.png" alt="Haki" />
+        {business.banner_url && <div className="profile-banner-wrap"><img className="profile-banner" src={business.banner_url} alt="" /></div>}
         <div className="profile-avatar-wrap">
           {business.logo_url ? (
             <img className="profile-avatar" src={business.logo_url} alt="" />
@@ -217,13 +241,13 @@ export default function Profile({ slug }) {
         {business.person_name && <p className="profile-person">{business.person_name}</p>}
         {business.bio && <p className="profile-bio">{business.bio}</p>}
 
-        <button className="profile-save" onClick={saveContact}>
+        <button className={`profile-save profile-button-${theme.buttonStyle}`} onClick={saveContact}>
           <FaRegAddressCard /> Save Contact
         </button>
 
         <div className="profile-links">
           {links.map(({ key, label, Icon, href }) => (
-            <button key={key} className="profile-link" onClick={() => handleLink({ key, label, Icon, href })}>
+            <button key={key} className={`profile-link profile-button-${theme.buttonStyle}`} onClick={() => handleLink({ key, label, Icon, href })}>
               <Icon />
               <span>{label}</span>
             </button>

@@ -95,10 +95,10 @@ export async function trackEvent(businessId, eventType) {
   });
 }
 
-export async function getAnalyticsByToken(token, days = 7) {
+export async function getAnalyticsByToken(token) {
   return supabaseFetch("/rpc/get_business_analytics", {
     method: "POST",
-    body: JSON.stringify({ p_token: token, p_days: days }),
+    body: JSON.stringify({ p_token: token }),
   });
 }
 
@@ -146,7 +146,7 @@ export async function getAdminBusinesses() {
   if (!token) throw new Error("Not signed in.");
 
   return supabaseFetch(
-    "/businesses?select=id,business_name,slug,person_name,analytics_token,is_active,created_at,menu_images,payment_qr_url&order=created_at.desc",
+    "/businesses?select=id,business_name,slug,person_name,analytics_token,is_active,created_at,menu_images,payment_qr_url,modules&order=created_at.desc",
     {},
     token
   );

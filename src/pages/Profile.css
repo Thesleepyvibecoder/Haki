@@ -338,3 +338,94 @@
     height: auto;
   }
 }
+/* ===== BUSINESS BRANDING ===== */
+.profile-page {
+  background: var(--profile-bg, #f3eadf);
+  color: var(--profile-text, #2b1c14);
+}
+
+.profile-page[style*="--profile-angle"] {
+  background: linear-gradient(var(--profile-angle, 180deg), var(--profile-bg, #f3eadf), var(--profile-bg-2, #fffaf3));
+}
+
+.profile-card {
+  background: color-mix(in srgb, var(--profile-card-bg, #fffaf3) calc(var(--profile-card-opacity, 1) * 100%), transparent);
+  border-color: var(--profile-card-border, #dfcbb7);
+}
+
+.profile-banner-wrap {
+  width: calc(100% + 36px);
+  margin: -18px -18px 0;
+  aspect-ratio: 3 / 1;
+  overflow: hidden;
+  border-radius: 25px 25px 0 0;
+  background: var(--profile-bg-2, #fffaf3);
+}
+
+.profile-banner {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profile-avatar-wrap {
+  position: relative;
+  z-index: 2;
+  margin-top: 18px;
+}
+
+.profile-card h1 { color: var(--profile-text, #2b1c14); }
+.profile-person, .profile-bio { color: var(--profile-muted, #806c5e); }
+
+.profile-save,
+.profile-link {
+  border-radius: var(--profile-radius, 14px);
+}
+
+.profile-save {
+  background: var(--profile-button-bg, #925332);
+  color: var(--profile-button-text, #fffaf5);
+  border-color: var(--profile-button-border, #8a4c2d);
+  box-shadow: 0 10px 28px color-mix(in srgb, var(--profile-button-bg, #925332) 22%, transparent);
+}
+
+.profile-save:hover {
+  background: color-mix(in srgb, var(--profile-button-bg, #925332) 88%, #000 12%);
+}
+
+.profile-link {
+  background: color-mix(in srgb, var(--profile-card-bg, #fffaf3) 72%, transparent);
+  color: var(--profile-text, #2f2119);
+  border-color: var(--profile-card-border, #dfcbb7);
+}
+
+.profile-link svg { color: var(--profile-accent, #925332); }
+.profile-link:hover { border-color: var(--profile-accent, #925332); }
+
+.profile-button-outline {
+  background: transparent !important;
+  color: var(--profile-button-bg, #925332) !important;
+  border-color: var(--profile-button-bg, #925332) !important;
+  box-shadow: none !important;
+}
+
+.profile-button-outline.profile-link {
+  color: var(--profile-button-bg, #925332) !important;
+}
+
+.profile-button-soft {
+  background: color-mix(in srgb, var(--profile-button-bg, #925332) 12%, transparent) !important;
+  color: var(--profile-button-bg, #925332) !important;
+  border-color: color-mix(in srgb, var(--profile-button-bg, #925332) 24%, transparent) !important;
+  box-shadow: none !important;
+}
+
+.profile-footer { color: var(--profile-muted, #9a8170); }
+.profile-footer strong { color: var(--profile-accent, #70452f); }
+
+@media (max-width: 460px) {
+  .profile-banner-wrap {
+    width: calc(100% + 36px);
+  }
+}
