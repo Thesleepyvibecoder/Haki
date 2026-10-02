@@ -270,6 +270,7 @@ export default function Profile({ slug }) {
         )}
 
         <div className="profile-footer">Powered by <strong>Haki</strong></div>
+        <div className="profile-bottom-wave" aria-hidden="true"><span /><span /></div>
       </div>
 
       {paymentOpen && (
