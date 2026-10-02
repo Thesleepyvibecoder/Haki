@@ -362,11 +362,11 @@
 .profile-banner-wrap {
   position: relative;
   width: calc(100% + 36px);
-  margin: -18px -18px -48px;
-  height: clamp(150px, 34vw, 205px);
+  margin: -18px -18px -58px;
+  height: clamp(255px, 68vw, 300px);
   overflow: visible;
   border-radius: 25px 25px 0 0;
-  background: var(--profile-bg-2, #fffaf3);
+  background: var(--profile-card-bg, #fffaf3);
 }
 
 .profile-banner {
@@ -374,16 +374,28 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center top;
   border-radius: 25px 25px 0 0;
 }
 
-/* The image melts into the profile instead of ending at a hard edge. */
+/* Fade belongs only to the photograph. It never sits over the profile text. */
 .profile-banner-wrap::after {
   content: "";
   position: absolute;
-  inset: 38% 0 -70px;
+  left: 0;
+  right: 0;
+  top: 48%;
+  bottom: -62px;
   pointer-events: none;
-  background: linear-gradient(180deg, transparent 0%, color-mix(in srgb, var(--profile-card-bg, #fffaf3) 34%, transparent) 35%, color-mix(in srgb, var(--profile-card-bg, #fffaf3) 78%, transparent) 66%, var(--profile-card-bg, #fffaf3) 100%);
+  background: linear-gradient(
+    180deg,
+    rgba(255,255,255,0) 0%,
+    color-mix(in srgb, var(--profile-card-bg, #fffaf3) 18%, transparent) 18%,
+    color-mix(in srgb, var(--profile-card-bg, #fffaf3) 52%, transparent) 48%,
+    color-mix(in srgb, var(--profile-card-bg, #fffaf3) 82%, transparent) 75%,
+    var(--profile-card-bg, #fffaf3) 100%
+  );
+  z-index: 1;
 }
 
 .profile-avatar-wrap {
@@ -412,6 +424,17 @@
   color: var(--profile-accent, #925332);
   font-size: 30px;
   font-weight: 700;
+}
+
+.profile-card h1,
+.profile-person,
+.profile-bio,
+.profile-save,
+.profile-links,
+.profile-payment,
+.profile-footer {
+  position: relative;
+  z-index: 4;
 }
 
 .profile-card h1 { color: var(--profile-text, #2b1c14); }
