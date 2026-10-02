@@ -541,3 +541,142 @@
     animation: none;
   }
 }
+
+/* ===== DYNAMIC PROFILE THEME ===== */
+
+/* Main profile elements */
+.profile-page {
+  background: var(--profile-bg, #f3eadf);
+  color: var(--profile-text, #2b1c14);
+}
+
+.profile-card {
+  background: color-mix(
+    in srgb,
+    var(--profile-card-bg, #fffaf3)
+    calc(var(--profile-card-opacity, 1) * 100%),
+    transparent
+  );
+  border-color: var(--profile-card-border, #dfcbb7);
+}
+
+.profile-card h1 {
+  color: var(--profile-text, #2b1c14);
+}
+
+.profile-person,
+.profile-bio {
+  color: var(--profile-muted, #806c5e);
+}
+
+/* Save Contact button */
+.profile-save {
+  border-color: var(--profile-button-border, #8a4c2d);
+  background: var(--profile-button-bg, #925332);
+  color: var(--profile-button-text, #fffaf5);
+  border-radius: var(--profile-radius, 14px);
+}
+
+.profile-save:hover {
+  background: var(--profile-accent, #925332);
+}
+
+/* Customer buttons */
+.profile-link {
+  border-color: var(--profile-button-border, #dfcbb7);
+  color: var(--profile-text, #2f2119);
+  border-radius: var(--profile-radius, 14px);
+  background: color-mix(
+    in srgb,
+    var(--profile-card-bg, #fffaf3)
+    calc(var(--profile-card-opacity, 1) * 72%),
+    transparent
+  );
+}
+
+.profile-link svg {
+  color: var(--profile-accent, #925332);
+}
+
+.profile-link:hover {
+  border-color: var(--profile-accent, #925332);
+  background: var(--profile-card-bg, #fffaf3);
+}
+
+/* Solid buttons */
+.profile-button-solid {
+  background: var(--profile-button-bg, #925332);
+  color: var(--profile-button-text, #fffaf5);
+  border-color: var(--profile-button-border, #8a4c2d);
+}
+
+/* Outline buttons */
+.profile-button-outline {
+  background: transparent;
+  color: var(--profile-text, #2b1c14);
+  border: 1px solid var(--profile-button-border, #8a4c2d);
+}
+
+.profile-button-outline svg {
+  color: var(--profile-accent, #925332);
+}
+
+/* Soft buttons */
+.profile-button-soft {
+  background: color-mix(
+    in srgb,
+    var(--profile-accent, #925332) 12%,
+    var(--profile-card-bg, #fffaf3)
+  );
+  color: var(--profile-text, #2b1c14);
+  border-color: color-mix(
+    in srgb,
+    var(--profile-accent, #925332) 35%,
+    var(--profile-card-border, #dfcbb7)
+  );
+}
+
+.profile-button-soft svg {
+  color: var(--profile-accent, #925332);
+}
+
+/* Footer */
+.profile-footer {
+  color: var(--profile-muted, #9a8170);
+}
+
+.profile-footer strong {
+  color: var(--profile-accent, #70452f);
+}
+
+/* Avatar */
+.profile-avatar {
+  border-color: var(--profile-card-border, #dfcbb7);
+  background: var(--profile-card-bg, #fffaf3);
+}
+
+.profile-avatar-fallback {
+  background: color-mix(
+    in srgb,
+    var(--profile-accent, #925332) 12%,
+    var(--profile-card-bg, #fffaf3)
+  );
+  color: var(--profile-accent, #925332);
+}
+
+/* Bottom decorative wave */
+.profile-bottom-wave span:first-child {
+  background: color-mix(
+    in srgb,
+    var(--profile-accent, #925332) 8%,
+    var(--profile-card-bg, #fffaf3)
+  );
+}
+
+.profile-bottom-wave span:last-child {
+  background: color-mix(
+    in srgb,
+    var(--profile-accent, #925332) 4%,
+    var(--profile-card-bg, #fffaf3)
+  );
+}
