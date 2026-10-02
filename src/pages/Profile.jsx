@@ -118,7 +118,14 @@ export default function Profile({ slug }) {
   const upiUrl = useMemo(() => business ? buildUpiUrl(business) : null, [business]);
   const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
 
-  if (status === "loading") return <div className="profile-state">Loading Haki profile...</div>;
+  if (status === "loading") return (
+    <div className="profile-loading" role="status" aria-label="Loading Haki profile">
+      <div className="profile-loading-logo-wrap">
+        <img className="profile-loading-logo" src="/haki-logo.png" alt="Haki" />
+      </div>
+      <span className="profile-loading-dot" aria-hidden="true" />
+    </div>
+  );
   if (status === "config") return <div className="profile-state">Haki profile system is not configured yet.</div>;
   if (status === "not-found") return <div className="profile-state"><h1>Profile not found</h1><p>This Haki profile doesn't exist or is inactive.</p></div>;
   if (status === "error") return <div className="profile-state"><h1>Something went wrong</h1><p>Please try again in a moment.</p></div>;

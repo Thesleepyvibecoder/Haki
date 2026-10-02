@@ -484,3 +484,60 @@
     width: calc(100% + 36px);
   }
 }
+
+
+/* Branded loading state */
+.profile-loading {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 24px;
+  background: #f3eadf;
+  color: #2b1c14;
+}
+
+.profile-loading-logo-wrap {
+  width: 76px;
+  height: 76px;
+  display: grid;
+  place-items: center;
+  border-radius: 22px;
+  background: #10152f;
+  box-shadow: 0 14px 36px rgba(30, 22, 18, 0.16);
+  animation: hakiLoaderPulse 1.55s ease-in-out infinite;
+}
+
+.profile-loading-logo {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+}
+
+.profile-loading-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #925332;
+  animation: hakiLoaderDot 1.15s ease-in-out infinite;
+}
+
+@keyframes hakiLoaderPulse {
+  0%, 100% { transform: scale(0.94); opacity: 0.72; }
+  50% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes hakiLoaderDot {
+  0%, 100% { opacity: 0.25; transform: translateY(0); }
+  50% { opacity: 1; transform: translateY(-2px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .profile-loading-logo-wrap,
+  .profile-loading-dot {
+    animation: none;
+  }
+}
