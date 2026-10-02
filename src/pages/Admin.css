@@ -2,61 +2,23 @@
 .admin-module{border:1px solid #202b3a;background:#090d13;border-radius:13px;padding:13px;display:grid;gap:10px}.admin-module-top{display:grid;grid-template-columns:28px 1fr 34px;gap:8px;align-items:center}.admin-module-top>strong{display:grid;place-items:center;width:28px;height:28px;border-radius:8px;background:#111722;color:#8ebcff;font-size:12px}.admin-module-top select{width:100%;box-sizing:border-box;background:#111722;border:1px solid #293545;color:#f5f7fa;border-radius:9px;padding:9px 10px}.admin-module-remove{border:1px solid #5d2229;background:#2a1215;color:#ff9da5;border-radius:8px;height:34px;cursor:pointer}.admin-module-actions{display:flex;align-items:center;gap:6px}.admin-module-actions>button{border:1px solid #293545;background:#111722;color:#b9c8db;border-radius:7px;padding:5px 9px;cursor:pointer}.admin-module-actions>button:disabled{opacity:.35;cursor:not-allowed}.admin-module-toggle{display:flex!important;align-items:center;gap:6px!important;margin-left:auto;font-size:11px!important;color:#8997aa!important}.admin-module-toggle input{width:auto!important;box-shadow:none!important}.admin-add-module{border:1px dashed #31527a;background:#0c1420;color:#8ebcff;border-radius:10px;padding:11px;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;font-weight:700}.admin-add-module:hover{border-color:#087bff;background:#101b2b}
 
 /* ===== PROFILE BRANDING CONTROLS ===== */
-.admin-theme-box {
-  border: 1px solid #e4e8ef;
-  border-radius: 16px;
-  padding: 14px;
-  background: #fbfcfe;
-}
-
-.admin-theme-presets {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
-  margin-bottom: 14px;
-}
-
-.admin-theme-presets button {
-  min-height: 40px;
-  border: 1px solid #dfe4ec;
-  border-radius: 10px;
-  background: #fff;
-  color: #243044;
-  cursor: pointer;
-  font-weight: 600;
-}
-
-.admin-theme-presets button.active {
-  border-color: #315efb;
-  box-shadow: 0 0 0 2px rgba(49, 94, 251, .10);
-}
-
-.admin-theme-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
-}
-
-.admin-theme-grid label {
-  display: flex;
-  gap: 7px;
-  flex-direction: column;
-}
-
-.admin-theme-grid input[type="color"] {
-  width: 100%;
-  height: 40px;
-  padding: 3px;
-  cursor: pointer;
-}
-
-.admin-theme-grid input[type="range"] {
-  width: 100%;
-}
-
-@media (max-width: 620px) {
-  .admin-theme-grid,
-  .admin-theme-presets {
-    grid-template-columns: 1fr;
-  }
-}
+.admin-theme-box{border:1px solid #202b3a;border-radius:16px;padding:14px;background:linear-gradient(145deg,#0b1018,#0a0e15);box-shadow:inset 0 1px 0 rgba(255,255,255,.025)}
+.admin-theme-presets{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:14px}
+.admin-theme-presets button{min-height:44px;border:1px solid #293545;border-radius:10px;background:#111722;color:#dce7f5;cursor:pointer;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px}
+.admin-theme-presets button svg{color:#8b5cf6}
+.admin-theme-presets button:hover{border-color:#087bff;background:#131c29}
+.admin-theme-presets button.active{border-color:#087bff;box-shadow:0 0 0 2px rgba(8,123,255,.12),0 8px 20px rgba(8,123,255,.06);background:#101b2b}
+.admin-theme-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.admin-theme-grid label{display:flex;gap:7px;flex-direction:column;color:#aebbd0!important;font-size:12px;font-weight:600}
+.admin-theme-grid input[type="color"]{width:100%;height:42px;padding:3px;cursor:pointer;background:#090d13;border:1px solid #293545;border-radius:10px}
+.admin-theme-grid input[type="number"],.admin-theme-grid select{width:100%;box-sizing:border-box;background:#090d13;border:1px solid #293545;color:#f5f7fa;border-radius:10px;padding:11px 12px;outline:none}
+.admin-theme-grid input[type="number"]:disabled,.admin-theme-grid input[type="color"]:disabled{opacity:.38;cursor:not-allowed}
+.admin-theme-grid input[type="range"]{width:100%;accent-color:#087bff}
+.admin-theme-box .admin-muted{color:#77869a;font-size:11px;line-height:1.5}
+.admin-form-actions{display:flex;gap:10px}
+.admin-form-actions .admin-primary{flex:1}
+.admin-secondary{border:1px solid #293545;border-radius:10px;padding:13px 15px;background:#111722;color:#c7d3e3;font-weight:800;cursor:pointer}
+.admin-secondary:hover{border-color:#087bff;color:#fff}
+.admin-links .admin-edit{color:#9cc8ff;border-color:#27466d}
+.admin-links .admin-edit:hover{border-color:#087bff;color:#fff;background:#101b2b}
+@media (max-width: 620px){.admin-theme-grid,.admin-theme-presets{grid-template-columns:1fr}.admin-form-actions{flex-direction:column}}
