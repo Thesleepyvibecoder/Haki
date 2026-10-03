@@ -646,7 +646,7 @@
 }
 
 .profile-footer strong {
-  color: var(--profile-accent, #70452f);
+  color: inherit;
 }
 
 /* Avatar */
