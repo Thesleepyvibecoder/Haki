@@ -11,6 +11,7 @@ async function supabaseFetch(path, options = {}, token = SUPABASE_KEY) {
 
   const response = await fetch(`${SUPABASE_URL}/rest/v1${path}`, {
     ...options,
+    cache: "no-store",
     headers: {
       apikey: SUPABASE_KEY,
       Authorization: `Bearer ${token}`,
@@ -63,6 +64,7 @@ export async function uploadMedia(file, path) {
     headers: {
       "Content-Type": file.type || "application/octet-stream",
       "x-upsert": "true",
+      "cache-control": "3600",
     },
     body: file,
   }, token);
