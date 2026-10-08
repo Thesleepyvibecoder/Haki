@@ -115,7 +115,7 @@ Rules:
 - The result will be reviewed by a restaurant owner before it is saved.
 - Return every visible category and dish you can read. Do not summarize or omit items merely because the menu is long.`;
 
-    const model = process.env.GEMINI_MENU_MODEL || "gemini-2.5-flash-lite";
+    const model = process.env.GEMINI_MENU_MODEL || "gemini-3.5-flash-lite";
     const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`;
 
     const response = await fetch(endpoint, {
