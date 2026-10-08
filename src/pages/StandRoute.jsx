@@ -1,0 +1,3 @@
+import {useEffect,useState} from "react";
+import {getPublicMenuByStand} from "../lib/supabaseRest";
+export default function StandRoute({token}){const [error,setError]=useState("");useEffect(()=>{(async()=>{try{const d=await getPublicMenuByStand(token);if(!d?.business_slug||!d?.menu?.slug)throw new Error("This NFC stand is not assigned to a menu.");window.location.replace(`/m/${d.business_slug}/${d.menu.slug}`)}catch(e){setError(e.message||"This NFC stand is unavailable.")}})()},[token]);return <main style={{minHeight:"100vh",display:"grid",placeItems:"center",padding:24,fontFamily:"system-ui"}}>{error||"Opening menu…"}</main>}

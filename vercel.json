@@ -1,20 +1,12 @@
 {
   "rewrites": [
-    {
-      "source": "/p/(.*)",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/a/(.*)",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/admin",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/menu-admin/(.*)",
-      "destination": "/index.html"
-    }
+    { "source": "/p/(.*)", "destination": "/index.html" },
+    { "source": "/a/(.*)", "destination": "/index.html" },
+    { "source": "/admin", "destination": "/index.html" },
+    { "source": "/menu-admin/(.*)", "destination": "/index.html" },
+    { "source": "/restaurant-login", "destination": "/index.html" },
+    { "source": "/restaurant-menu", "destination": "/index.html" },
+    { "source": "/m/(.*)", "destination": "/index.html" },
+    { "source": "/s/(.*)", "destination": "/index.html" }
   ]
 }

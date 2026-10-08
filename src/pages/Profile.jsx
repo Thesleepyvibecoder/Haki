@@ -113,6 +113,9 @@ export default function Profile({ slug }) {
   }, [slug]);
 
   const menuImages = useMemo(() => business ? getMenuImages(business) : [], [business]);
+  const menuAccessMode = business?.menu_access_mode || "image";
+  const digitalMenuAvailable = Boolean(business?.digital_menu_enabled) || menuAccessMode === "digital";
+  const menuAvailable = digitalMenuAvailable || menuImages.length > 0 || menuAccessMode === "whatsapp";
   const configuredModules = useMemo(() => business ? getModules(business) : [], [business]);
   const theme = useMemo(() => getTheme(business), [business]);
   const upiUrl = useMemo(() => business ? buildUpiUrl(business) : null, [business]);
@@ -136,11 +139,11 @@ export default function Profile({ slug }) {
         if (module.type === "menu" || module.type === "payment") return { ...module, key: module.type, Icon, href: null };
         const value = module.type === "call" ? business.phone : module.type === "email" ? business.email : module.value;
         return { ...module, key: module.type, Icon, href: normalizeLink(module.type === "google_review" ? "google_review_url" : module.type, value) };
-      }).filter((item) => (item.type === "menu" && menuImages.length > 0) || (item.type === "payment" && (business.upi_id || business.payment_qr_url)) || item.href)
+      }).filter((item) => (item.type === "menu" && menuAvailable) || (item.type === "payment" && (business.upi_id || business.payment_qr_url)) || item.href)
     : coreLinks.map(([key, label, Icon]) => ({ key, label, Icon, value: business[key], href: normalizeLink(key, business[key]), type: key }))
       .filter((item) => item.href);
 
-  if (configuredModules.length === 0 && menuImages.length > 0) {
+  if (configuredModules.length === 0 && menuAvailable) {
     links.splice(1, 0, { key: "menu", type: "menu", label: "Menu", Icon: FaUtensils, href: null });
   }
 
@@ -167,6 +170,16 @@ export default function Profile({ slug }) {
   const handleLink = async (item) => {
     if (item.key === "menu") {
       await trackEvent(business.id, "menu_click").catch(() => {});
+      if (menuAccessMode === "digital" || digitalMenuAvailable) {
+        window.location.href = `/m/${business.slug}`;
+        return;
+      }
+      if (menuAccessMode === "whatsapp") {
+        const phone = String(business.whatsapp || business.phone || "").replace(/[^\d]/g, "");
+        const message = encodeURIComponent(business.menu_whatsapp_message || "Hi, I would like to access your menu.");
+        if (phone) window.location.href = `https://wa.me/${phone}?text=${message}`;
+        return;
+      }
       setMenuIndex(0);
       setMenuOpen(true);
       return;

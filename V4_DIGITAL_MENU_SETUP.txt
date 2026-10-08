@@ -1,0 +1,104 @@
+HAKI DIGITAL MENU V4
+
+What this patch adds
+--------------------
+1. Multiple Digital Menus per business.
+2. Independent logo, banner, title, subtitle and theme for each Digital Menu.
+3. Public menu selector: /m/<business-slug>
+4. Direct menu URL: /m/<business-slug>/<menu-slug>
+5. Stable NFC stand URL: /s/<stand-token>
+6. NFC stand -> assigned Digital Menu routing.
+7. Restaurant manager login: /restaurant-login
+8. Restaurant manager dashboard: /restaurant-menu
+9. Haki owner Manage Menu: /menu-admin/<business-id>
+10. Menu access mode on Haki business editor:
+    - image
+    - digital
+    - whatsapp
+11. Existing image/catalogue menu remains untouched.
+12. AI menu import remains Gemini-based and now accepts images/PDF payloads.
+13. Restaurant manager is scoped to their business through security-definer RPCs and RLS.
+14. Cafe Rio is the default Digital Menu theme.
+
+IMPORTANT DATABASE STEP
+-----------------------
+Run ONLY:
+
+supabase/digital_menu_v4_multi.sql
+
+Do not rerun older digital-menu SQL unless your database is missing those earlier columns.
+
+The V4 SQL includes the menu_access_mode columns, but if you already ran the menu_access_mode SQL that is fine because V4 uses IF NOT EXISTS / constraint replacement.
+
+Haki owner setup
+----------------
+The new security model uses public.haki_admin_users.
+
+After running the SQL, open:
+Supabase Dashboard -> Authentication -> Users
+
+Copy the UID of the existing Haki owner/admin account.
+
+Run:
+
+insert into public.haki_admin_users(user_id)
+values ('YOUR_HAKI_ADMIN_USER_UUID')
+on conflict do nothing;
+
+This must be the existing Haki admin login account.
+
+VERCEL ENVIRONMENT VARIABLES
+----------------------------
+Existing:
+VITE_SUPABASE_URL
+VITE_SUPABASE_PUBLISHABLE_KEY
+GEMINI_API_KEY
+
+Add:
+SUPABASE_SECRET_KEY
+
+Use the Supabase Secret Key (sb_secret_...) in Vercel server-side environment variables only.
+Never put it in frontend code or chat.
+
+Manager flow
+------------
+Haki Admin -> business -> Manage Menu -> Restaurant Access
+
+Create manager email + temporary password.
+
+Give the manager:
+/restaurant-login
+and the credentials.
+
+The manager can then:
+- create multiple digital menus
+- import menu images/PDFs with AI
+- review/edit items
+- change menu branding
+- choose menu theme
+- assign NFC stands
+
+Public flow
+-----------
+Profile menu button depends on Menu Access mode:
+
+image    -> existing uploaded image menu
+ digital -> /m/<business-slug> menu selector
+whatsapp -> opens WhatsApp with configured message
+
+NFC stand flow
+--------------
+Create a stand in Digital Menu -> NFC Stands.
+Assign it to a menu.
+Copy its /s/<token> URL into the NFC stand.
+
+The chip points to the stable stand URL, not the final menu URL.
+If the restaurant later changes which menu that stand represents, update the assignment in Haki. The physical chip does not need to be rewritten.
+
+The existing business NFC/profile URL is NOT changed by this patch.
+
+IMPORTANT
+---------
+The current repository in this patch was syntax-checked with TypeScript's JSX parser.
+A full Vite production build was NOT completed in the container because npm dependency installation timed out.
+Run `npm ci` and `npm run build` locally or let Vercel build it after pushing.

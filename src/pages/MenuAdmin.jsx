@@ -1,201 +1,67 @@
-import { useEffect, useMemo, useState } from "react";
-import {
-  FaCheck, FaExternalLinkAlt, FaPlus, FaTrash, FaArrowUp, FaArrowDown,
-  FaSave, FaUtensils, FaUpload, FaMagic, FaTimes, FaExclamationTriangle
-} from "react-icons/fa";
-import { getDigitalMenuAdminByToken, saveDigitalMenuByToken } from "../lib/supabaseRest";
+import {useEffect,useMemo,useState} from "react";
+import {FaArrowDown,FaArrowUp,FaCheck,FaCopy,FaExternalLinkAlt,FaMagic,FaPlus,FaSave,FaSignOutAlt,FaTrash,FaUpload,FaUtensils} from "react-icons/fa";
+import {clearRestaurantToken,createRestaurantManager,deleteAdminDigitalMenu,deleteRestaurantMenu,getAdminDigitalMenus,getAdminToken,getRestaurantMenus,getRestaurantToken,getPublicMediaUrl,saveAdminDigitalMenu,saveAdminStand,saveRestaurantMenu,saveRestaurantStand,uploadMedia,uploadRestaurantMedia} from "../lib/supabaseRest";
 import "./MenuAdmin.css";
-
-const DAYS = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
-const EMPTY_HOURS = DAYS.map(day => ({ day, open: "10:00", close: "22:00", closed: false }));
-const EMPTY_MENU = { title: "", subtitle: "", categories: [] };
-const EMPTY_DETAILS = { tagline: "", story: "", address: "", mapUrl: "", instagramUrl: "", googleReviewUrl: "" };
-
-function uid(){ return crypto.randomUUID?.() || `${Date.now()}-${Math.random()}`; }
-function blankCategory(){ return { id: uid(), name: "New Category", items: [] }; }
-function blankItem(){ return { id: uid(), name: "New Item", description: "", price: "", available: true }; }
-
-async function compressMenuImage(file){
-  if (!file.type.startsWith("image/")) throw new Error("Please upload an image file.");
-  const bitmap = await createImageBitmap(file);
-  const max = 1800;
-  const scale = Math.min(1, max / Math.max(bitmap.width, bitmap.height));
-  const canvas = document.createElement("canvas");
-  canvas.width = Math.max(1, Math.round(bitmap.width * scale));
-  canvas.height = Math.max(1, Math.round(bitmap.height * scale));
-  canvas.getContext("2d").drawImage(bitmap, 0, 0, canvas.width, canvas.height);
-  bitmap.close();
-  return new Promise((resolve, reject) => canvas.toBlob(blob => {
-    if (!blob) return reject(new Error("Could not prepare the image."));
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = () => reject(new Error("Could not read the image."));
-    reader.readAsDataURL(blob);
-  }, "image/jpeg", 0.78));
-}
-
-function mergeExtractedMenus(base, extracted){
-  const next = { ...base, title: base.title || extracted.title || "", subtitle: base.subtitle || extracted.subtitle || "", categories: [...(base.categories || [])] };
-  for (const category of extracted.categories || []) {
-    const existing = next.categories.find(c => c.name.trim().toLowerCase() === category.name.trim().toLowerCase());
-    const incomingItems = (category.items || []).map(item => ({ ...blankItem(), ...item, id: uid(), available: item.available !== false }));
-    if (!existing) {
-      next.categories.push({ id: uid(), name: category.name || "Other", items: incomingItems });
-    } else {
-      existing.items = [...existing.items, ...incomingItems];
-    }
-  }
-  return next;
-}
+const DAYS=["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
+const EMPTY_HOURS=DAYS.map(day=>({day,open:"10:00",close:"22:00",closed:false}));
+const THEMES={
+ "Cafe Rio":{bg:"#171717",panel:"#202020",panel2:"#292929",accent:"#e51b23",accent2:"#b80f17",cream:"#fff7ed",gold:"#f4c542"},
+ "Classic Red":{bg:"#fff7f5",panel:"#fff",panel2:"#f9e7e4",accent:"#c62828",accent2:"#a51e1e",cream:"#30100d",gold:"#b67a00"},
+ "Emerald":{bg:"#10251e",panel:"#17352b",panel2:"#21483a",accent:"#43a56f",accent2:"#2c8053",cream:"#f4fff8",gold:"#d9c47a"},
+ "Midnight Gold":{bg:"#111318",panel:"#1b1e25",panel2:"#252a34",accent:"#d6aa45",accent2:"#aa7f24",cream:"#faf7ef",gold:"#f0c967"}
+};
+const EMPTY_MENU={id:"",slug:"",title:"",subtitle:"",logo_url:"",banner_url:"",theme:{preset:"Cafe Rio"},menu_data:{categories:[]},working_hours:EMPTY_HOURS,details:{tagline:"",story:"",address:"",mapUrl:"",instagramUrl:"",googleReviewUrl:""},is_active:true};
+function uid(){return crypto.randomUUID?.()||`${Date.now()}-${Math.random()}`}
+function slugify(v){return String(v||"").toLowerCase().trim().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"").slice(0,60)}
+function blankCategory(){return{id:uid(),name:"New Category",items:[]}}
+function blankItem(){return{id:uid(),name:"New Item",description:"",price:"",available:true}}
+function clone(v){return JSON.parse(JSON.stringify(v))}
+async function compress(file,max=1800,quality=.78){const bitmap=await createImageBitmap(file);const scale=Math.min(1,max/Math.max(bitmap.width,bitmap.height));const canvas=document.createElement("canvas");canvas.width=Math.max(1,Math.round(bitmap.width*scale));canvas.height=Math.max(1,Math.round(bitmap.height*scale));canvas.getContext("2d").drawImage(bitmap,0,0,canvas.width,canvas.height);bitmap.close?.();return new Promise((resolve,reject)=>canvas.toBlob(b=>{if(!b)return reject(new Error("Could not prepare image."));resolve(new File([b],`${file.name.replace(/\.[^.]+$/,'')}.webp`,{type:"image/webp"}))},"image/webp",quality))}
+function normalizeMenu(raw){const x={...clone(EMPTY_MENU),...clone(raw||{})};x.theme={preset:"Cafe Rio",...(raw?.theme||{})};x.menu_data={categories:Array.isArray(raw?.menu_data?.categories)?raw.menu_data.categories:[]};x.working_hours=Array.isArray(raw?.working_hours)&&raw.working_hours.length?raw.working_hours:clone(EMPTY_HOURS);x.details={...EMPTY_MENU.details,...(raw?.details||{})};return x}
+function mergeImported(base,imported){const next=clone(base);next.menu_data.categories=next.menu_data.categories||[];for(const cat of imported.categories||[]){const found=next.menu_data.categories.find(c=>String(c.name).trim().toLowerCase()===String(cat.name).trim().toLowerCase());const incoming=(cat.items||[]).map(i=>({...blankItem(),...i,id:uid(),available:i.available!==false}));if(found)found.items=[...(found.items||[]),...incoming];else next.menu_data.categories.push({id:uid(),name:cat.name||"Other",items:incoming})}if(!next.title)next.title=imported.title||"Menu";if(!next.subtitle)next.subtitle=imported.subtitle||"";return next}
 
 export default function MenuAdmin(){
-  const token = useMemo(() => window.location.pathname.split("/").filter(Boolean)[1] || "", []);
-  const [business,setBusiness] = useState(null);
-  const [menu,setMenu] = useState(EMPTY_MENU);
-  const [hours,setHours] = useState(EMPTY_HOURS);
-  const [details,setDetails] = useState(EMPTY_DETAILS);
-  const [tab,setTab] = useState("menu");
-  const [preview,setPreview] = useState(false);
-  const [importOpen,setImportOpen] = useState(false);
-  const [importFiles,setImportFiles] = useState([]);
-  const [importing,setImporting] = useState(false);
-  const [importProgress,setImportProgress] = useState("");
-  const [importedMenu,setImportedMenu] = useState(null);
-  const [loading,setLoading] = useState(true);
-  const [saving,setSaving] = useState(false);
-  const [message,setMessage] = useState("");
-  const [error,setError] = useState("");
-
-  useEffect(() => {
-    let alive = true;
-    (async() => {
-      try {
-        const data = await getDigitalMenuAdminByToken(token);
-        if (!alive) return;
-        setBusiness(data);
-        setMenu({ ...EMPTY_MENU, ...(data.digital_menu || {}) });
-        setHours(Array.isArray(data.digital_menu_hours) && data.digital_menu_hours.length ? data.digital_menu_hours : EMPTY_HOURS);
-        setDetails({ ...EMPTY_DETAILS, ...(data.digital_menu_details || {}) });
-      } catch(err) {
-        if (alive) setError(err.message || "This menu link is invalid or unavailable.");
-      } finally {
-        if (alive) setLoading(false);
-      }
-    })();
-    return () => { alive = false; };
-  }, [token]);
-
-  const save = async() => {
-    setSaving(true); setMessage(""); setError("");
-    try {
-      await saveDigitalMenuByToken(token, {
-        digital_menu: menu,
-        digital_menu_hours: hours,
-        digital_menu_details: details,
-        digital_menu_enabled: true
-      });
-      setMessage("Changes saved.");
-    } catch(err) {
-      setError(err.message || "Could not save changes.");
-    } finally { setSaving(false); }
-  };
-
-  const updateCategory = (id,patch) => setMenu(m => ({...m,categories:m.categories.map(c => c.id===id ? {...c,...patch}:c)}));
-  const removeCategory = id => setMenu(m => ({...m,categories:m.categories.filter(c=>c.id!==id)}));
-  const moveCategory = (i,d) => setMenu(m => { const a=[...m.categories], n=i+d; if(n<0||n>=a.length)return m; [a[i],a[n]]=[a[n],a[i]]; return {...m,categories:a}; });
-  const addCategory = () => setMenu(m => ({...m,categories:[...m.categories,blankCategory()]}));
-  const addItem = id => updateCategory(id,{items:[...(menu.categories.find(c=>c.id===id)?.items||[]),blankItem()]});
-  const updateItem = (cid,iid,patch) => updateCategory(cid,{items:(menu.categories.find(c=>c.id===cid)?.items||[]).map(i=>i.id===iid?{...i,...patch}:i)});
-  const removeItem = (cid,iid) => updateCategory(cid,{items:(menu.categories.find(c=>c.id===cid)?.items||[]).filter(i=>i.id!==iid)});
-  const moveItem = (cid,i,d) => { const c=menu.categories.find(x=>x.id===cid); if(!c)return; const a=[...c.items],n=i+d; if(n<0||n>=a.length)return; [a[i],a[n]]=[a[n],a[i]]; updateCategory(cid,{items:a}); };
-
-  const runImport = async() => {
-    if (!importFiles.length) return;
-    setImporting(true); setImportProgress(""); setError(""); setMessage("");
-    try {
-      let extracted = { title:"", subtitle:"", categories:[], warnings:[] };
-      for (let i=0;i<importFiles.length;i++) {
-        setImportProgress(`Reading menu page ${i+1} of ${importFiles.length}…`);
-        const imageData = await compressMenuImage(importFiles[i]);
-        const response = await fetch("/api/extract-menu", {
-          method:"POST",
-          headers:{"Content-Type":"application/json"},
-          body:JSON.stringify({ token, image:imageData })
-        });
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.error || "Menu extraction failed.");
-        extracted = mergeExtractedMenus(extracted, data.menu || data);
-        extracted.warnings = [...(extracted.warnings || []), ...(data.menu?.warnings || data.warnings || [])];
-      }
-      setImportedMenu(extracted);
-      setImportProgress("");
-    } catch(err) {
-      setError(err.message || "Could not read the menu image.");
-    } finally { setImporting(false); }
-  };
-
-  const applyImported = () => {
-    if (!importedMenu) return;
-    setMenu(current => mergeExtractedMenus(current.categories?.length ? current : EMPTY_MENU, importedMenu));
-    setImportedMenu(null);
-    setImportFiles([]);
-    setImportOpen(false);
-    setMessage("Imported menu added to the editor. Review it, then save.");
-  };
-
-  if(loading) return <main className="menu-admin-page"><div className="menu-admin-loading">Loading menu admin…</div></main>;
-  if(error && !business) return <main className="menu-admin-page"><div className="menu-admin-error"><h1>Menu Admin</h1><p>{error}</p></div></main>;
-  if(!business) return null;
-
-  return <main className="menu-admin-page">
-    <header className="menu-admin-top">
-      <div><strong>{business.business_name}</strong><span>OWNER ADMIN PANEL</span></div>
-      <div className="menu-admin-top-actions"><a href={`/p/${business.slug}`} target="_blank" rel="noreferrer">View Profile <FaExternalLinkAlt/></a><button onClick={save} disabled={saving}>{saving?<FaSave/>:<FaCheck/>} {saving?"Saving…":"Save Changes"}</button></div>
-    </header>
-
-    <div className="menu-admin-layout">
-      <nav className="menu-admin-nav">{[["menu","Menu"],["hours","Working Hours"],["branding","Logo & Banner"],["details","Restaurant Details"],["backup","Backup"]].map(([id,label])=><button key={id} className={tab===id?"active":""} onClick={()=>setTab(id)}>{label}</button>)}</nav>
-      <section className="menu-admin-content">
-        {tab==="menu" && <>
-          <div className="menu-admin-heading"><div><h1>Digital Menu</h1><p>Create and edit the menu that customers will see online.</p></div><div className="menu-heading-actions"><button className="menu-admin-secondary" onClick={()=>setImportOpen(true)}><FaUpload/> Upload Menu</button><button className="menu-admin-primary" onClick={addCategory}><FaPlus/> Add Category</button></div></div>
-          <div className="menu-import-note"><FaMagic/><div><strong>Upload an existing menu and let Haki organise it.</strong><span>Upload a clear menu image. Haki reads the categories, dishes, descriptions and prices, then lets you review everything before saving.</span></div></div>
-          <div className="menu-field-grid"><label>Menu title<input value={menu.title} onChange={e=>setMenu({...menu,title:e.target.value})} placeholder={`${business.business_name} Menu`}/></label><label>Subtitle<input value={menu.subtitle} onChange={e=>setMenu({...menu,subtitle:e.target.value})} placeholder="Fresh menu · prices can be updated anytime"/></label></div>
-          <div className="menu-categories">
-            {menu.categories.length===0&&<div className="menu-empty"><FaUtensils/><strong>No categories yet</strong><span>Upload an existing menu or add your first category.</span></div>}
-            {menu.categories.map((c,ci)=><article className="menu-category" key={c.id}>
-              <div className="menu-category-head"><input value={c.name} onChange={e=>updateCategory(c.id,{name:e.target.value})}/><div><button onClick={()=>moveCategory(ci,-1)} disabled={ci===0}><FaArrowUp/></button><button onClick={()=>moveCategory(ci,1)} disabled={ci===menu.categories.length-1}><FaArrowDown/></button><button className="danger" onClick={()=>removeCategory(c.id)}><FaTrash/></button></div></div>
-              <div className="menu-items-editor">{c.items.map((item,ii)=><div className="menu-item-row" key={item.id}><div className="menu-item-fields"><input value={item.name} onChange={e=>updateItem(c.id,item.id,{name:e.target.value})} placeholder="Item name"/><input value={item.description} onChange={e=>updateItem(c.id,item.id,{description:e.target.value})} placeholder="Description"/><input value={item.price} onChange={e=>updateItem(c.id,item.id,{price:e.target.value})} placeholder="₹299"/><label className="availability"><input type="checkbox" checked={item.available!==false} onChange={e=>updateItem(c.id,item.id,{available:e.target.checked})}/> Available</label></div><div className="menu-item-actions"><button onClick={()=>moveItem(c.id,ii,-1)} disabled={ii===0}><FaArrowUp/></button><button onClick={()=>moveItem(c.id,ii,1)} disabled={ii===c.items.length-1}><FaArrowDown/></button><button className="danger" onClick={()=>removeItem(c.id,item.id)}><FaTrash/></button></div></div>)}</div>
-              <button className="menu-add-item" onClick={()=>addItem(c.id)}><FaPlus/> Add Dish</button>
-            </article>)}
-          </div>
-        </>}
-
-        {tab==="hours"&&<div className="menu-admin-card"><h1>Working Hours</h1><p>Update the hours shown on the digital menu.</p>{hours.map((h,i)=><div className="hours-row" key={h.day}><strong>{h.day}</strong><label><input type="checkbox" checked={!h.closed} onChange={e=>setHours(x=>x.map((v,j)=>j===i?{...v,closed:!e.target.checked}:v))}/> Open</label><input type="time" value={h.open} disabled={h.closed} onChange={e=>setHours(x=>x.map((v,j)=>j===i?{...v,open:e.target.value}:v))}/><span>to</span><input type="time" value={h.close} disabled={h.closed} onChange={e=>setHours(x=>x.map((v,j)=>j===i?{...v,close:e.target.value}:v))}/></div>)}</div>}
-        {tab==="branding"&&<div className="menu-admin-card"><h1>Logo & Banner</h1><p>The digital menu uses the existing Haki business branding.</p><div className="branding-preview"><div><span>Logo</span>{business.logo_url?<img src={business.logo_url} alt="Business logo"/>:<div className="no-image">No logo</div>}</div><div><span>Banner</span>{business.banner_url?<img src={business.banner_url} alt="Business banner"/>:<div className="no-image">No banner</div>}</div></div><p className="menu-note">Branding uploads remain controlled from Haki Business Profile for now.</p></div>}
-        {tab==="details"&&<div className="menu-admin-card"><h1>Restaurant Details</h1><p>These details belong to the digital menu experience.</p><label>Tagline<input value={details.tagline} onChange={e=>setDetails({...details,tagline:e.target.value})} placeholder="Italian Breeze · Pure Veg"/></label><label>Restaurant story<textarea value={details.story} onChange={e=>setDetails({...details,story:e.target.value})} rows="5" placeholder="Tell customers about the restaurant..."/></label><label>Address<input value={details.address} onChange={e=>setDetails({...details,address:e.target.value})}/></label><div className="menu-field-grid"><label>Google Maps URL<input value={details.mapUrl} onChange={e=>setDetails({...details,mapUrl:e.target.value})}/></label><label>Instagram URL<input value={details.instagramUrl} onChange={e=>setDetails({...details,instagramUrl:e.target.value})}/></label></div><label>Google Review URL<input value={details.googleReviewUrl} onChange={e=>setDetails({...details,googleReviewUrl:e.target.value})}/></label></div>}
-        {tab==="backup"&&<div className="menu-admin-card"><h1>Backup</h1><p>Keep a copy of this digital menu before making major changes.</p><div className="backup-actions"><button onClick={()=>{const blob=new Blob([JSON.stringify({menu,hours,details},null,2)],{type:"application/json"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=`${business.slug}-menu-backup.json`;a.click();URL.revokeObjectURL(url)}}>Export Menu Backup</button><label className="backup-import">Import Backup<input type="file" accept="application/json" onChange={async e=>{const file=e.target.files?.[0];if(!file)return;try{const data=JSON.parse(await file.text());if(data.menu)setMenu({...EMPTY_MENU,...data.menu});if(Array.isArray(data.hours))setHours(data.hours);if(data.details)setDetails({...EMPTY_DETAILS,...data.details});setMessage("Backup loaded. Click Save Changes to apply it.")}catch{setError("Invalid backup file.")}}}/></label></div></div>}
-
-        <div className="menu-admin-bottom"><button className="menu-admin-secondary" onClick={()=>setPreview(true)}>Preview Digital Menu</button><button className="menu-admin-primary" onClick={save} disabled={saving}><FaCheck/> {saving?"Saving…":"Save Changes"}</button></div>
-        {message&&<div className="menu-admin-success"><FaCheck/> {message}</div>}{error&&<div className="menu-admin-error">{error}</div>}
-      </section>
-    </div>
-
-    {importOpen&&<div className="menu-import-overlay" onClick={e=>e.target===e.currentTarget&&setImportOpen(false)}><div className="menu-import-modal">
-      <div className="menu-import-header"><div><h2><FaMagic/> Import Existing Menu</h2><p>Upload one or more clear menu images. Haki will organise the content into editable categories and dishes.</p></div><button onClick={()=>setImportOpen(false)}><FaTimes/></button></div>
-      {!importedMenu ? <>
-        <label className="menu-upload-drop"><FaUpload/><strong>Choose menu image(s)</strong><span>JPG, PNG or WebP · multiple pages supported</span><input type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={e=>setImportFiles(Array.from(e.target.files||[]))}/></label>
-        {importFiles.length>0&&<div className="selected-menu-files">{importFiles.map((file,i)=><div key={`${file.name}-${i}`}><span>{i+1}</span><strong>{file.name}</strong><small>{Math.round(file.size/1024)} KB</small></div>)}</div>}
-        <div className="menu-import-warning"><FaExclamationTriangle/><span>AI extracts what is visible. It does not invent missing prices or dishes. Review the result before saving.</span></div>
-        {importProgress&&<div className="menu-import-progress">{importProgress}</div>}
-        <div className="menu-import-actions"><button className="menu-admin-secondary" onClick={()=>setImportOpen(false)}>Cancel</button><button className="menu-admin-primary" onClick={runImport} disabled={!importFiles.length||importing}>{importing?<><FaMagic/> Reading…</>:<><FaMagic/> Digitalize Menu</>}</button></div>
-      </> : <>
-        <div className="import-review-head"><div><strong>Review imported menu</strong><span>{importedMenu.categories.reduce((n,c)=>n+(c.items?.length||0),0)} items in {importedMenu.categories.length} categories</span></div><button className="menu-admin-secondary" onClick={()=>setImportedMenu(null)}>Re-upload</button></div>
-        {importedMenu.warnings?.length>0&&<div className="menu-import-warning"><FaExclamationTriangle/><div>{importedMenu.warnings.map((w,i)=><span key={i}>{w}</span>)}</div></div>}
-        <div className="import-review-list">{importedMenu.categories.map((c,ci)=><div className="import-review-category" key={`${c.name}-${ci}`}><h3>{c.name}</h3>{(c.items||[]).map((item,ii)=><div className="import-review-item" key={`${item.name}-${ii}`}><div><strong>{item.name}</strong><span>{item.description || "No description detected"}</span></div><b>{item.price || "Price not detected"}</b></div>)}</div>)}</div>
-        <div className="menu-import-actions"><button className="menu-admin-secondary" onClick={()=>setImportedMenu(null)}>Back</button><button className="menu-admin-primary" onClick={applyImported}><FaCheck/> Add to Menu Editor</button></div>
-      </>}
-    </div></div>}
-
-    {preview&&<div className="menu-preview-overlay" onClick={e=>e.target===e.currentTarget&&setPreview(false)}><div className="menu-preview"><button className="preview-close" onClick={()=>setPreview(false)}>×</button><div className="preview-hero">{business.banner_url&&<img src={business.banner_url} alt=""/>}</div><div className="preview-body">{business.logo_url&&<img className="preview-logo" src={business.logo_url} alt=""/>}<h2>{business.business_name}</h2><p>{details.tagline}</p><div className="preview-hours">{hours.filter(h=>!h.closed).map(h=><span key={h.day}>{h.day.slice(0,3)} {h.open}–{h.close}</span>)}</div><h3>{menu.title||`${business.business_name} Menu`}</h3><small>{menu.subtitle}</small>{menu.categories.map(c=><section key={c.id}><h4>{c.name}</h4>{c.items.filter(i=>i.available!==false).map(i=><div className="preview-item" key={i.id}><div><strong>{i.name}</strong><span>{i.description}</span></div><b>{i.price}</b></div>)}</section>)}</div></div></div>}
-  </main>;
+ const manager=window.location.pathname==="/restaurant-menu"; const routeId=useMemo(()=>manager?"":decodeURIComponent(window.location.pathname.split("/").filter(Boolean)[1]||""),[manager]);
+ const [business,setBusiness]=useState(null),[menus,setMenus]=useState([]),[stands,setStands]=useState([]),[menu,setMenu]=useState(null),[tab,setTab]=useState("menus"),[loading,setLoading]=useState(true),[saving,setSaving]=useState(false),[message,setMessage]=useState(""),[error,setError]=useState("");
+ const [importFiles,setImportFiles]=useState([]),[importing,setImporting]=useState(false),[imported,setImported]=useState(null);
+ const [logoFile,setLogoFile]=useState(null),[bannerFile,setBannerFile]=useState(null),[managerEmail,setManagerEmail]=useState(""),[managerPassword,setManagerPassword]=useState(""),[managerResult,setManagerResult]=useState("");
+ const [standDraft,setStandDraft]=useState({id:"",menu_id:"",stand_name:"NFC Stand",location:"",is_active:true});
+ const base=window.location.origin;
+ const load=async()=>{setLoading(true);setError("");try{const data=manager?await getRestaurantMenus():await getAdminDigitalMenus(routeId);const b=data?.business;if(!b)throw new Error("Business not found.");setBusiness(b);setMenus(Array.isArray(data.menus)?data.menus:[]);setStands(Array.isArray(data.stands)?data.stands:[]);setMenu(null)}catch(e){setError(e.message||"Could not load menu management.")}finally{setLoading(false)}};
+ useEffect(()=>{load()},[manager,routeId]);
+ const selectMenu=m=>{setMenu(normalizeMenu(m));setTab("editor");setMessage("");setError("")};
+ const newMenu=()=>{setMenu(normalizeMenu({...EMPTY_MENU,title:"New Menu",slug:"new-menu"}));setTab("editor");setMessage("")};
+ const save=async()=>{if(!menu)return;setSaving(true);setError("");setMessage("");try{const payload=clone(menu);payload.slug=slugify(payload.slug||payload.title)||"menu";payload.title=payload.title||"Menu";const result=manager?await saveRestaurantMenu(payload):await saveAdminDigitalMenu(business.id,payload);const saved=result?.menu||result;setMenus(prev=>{const without=prev.filter(x=>x.id!==saved?.id);return [...without,saved||payload]});setMenu(normalizeMenu(saved||payload));setMessage("Menu saved.");}catch(e){setError(e.message||"Could not save menu.")}finally{setSaving(false)}};
+ const duplicate=async source=>{try{const copy=normalizeMenu({...source,id:"",slug:`${source.slug||slugify(source.title)}-copy`,title:`${source.title||"Menu"} Copy`});const saved=manager?await saveRestaurantMenu(copy):await saveAdminDigitalMenu(business.id,copy);setMenus(prev=>[...prev,saved]);setMessage("Menu duplicated.")}catch(e){setError(e.message||"Could not duplicate menu.")}};
+ const remove=async id=>{if(!window.confirm("Delete this digital menu?"))return;try{if(manager)await deleteRestaurantMenu(id);else await deleteAdminDigitalMenu(business.id,id);setMenus(prev=>prev.filter(m=>m.id!==id));if(menu?.id===id){setMenu(null);setTab("menus")}}catch(e){setError(e.message||"Could not delete menu.")}};
+ const updateMenu=(patch)=>setMenu(m=>({...m,...patch}));
+ const updateCategory=(cid,patch)=>updateMenu({menu_data:{...menu.menu_data,categories:menu.menu_data.categories.map(c=>c.id===cid?{...c,...patch}:c)}});
+ const addCategory=()=>updateMenu({menu_data:{...menu.menu_data,categories:[...menu.menu_data.categories,blankCategory()]}});
+ const removeCategory=cid=>updateMenu({menu_data:{...menu.menu_data,categories:menu.menu_data.categories.filter(c=>c.id!==cid)}});
+ const moveCategory=(i,d)=>{const a=[...menu.menu_data.categories],n=i+d;if(n<0||n>=a.length)return;[a[i],a[n]]=[a[n],a[i]];updateMenu({menu_data:{...menu.menu_data,categories:a}})};
+ const addItem=cid=>{const c=menu.menu_data.categories.find(x=>x.id===cid);updateCategory(cid,{items:[...(c?.items||[]),blankItem()]})};
+ const updateItem=(cid,iid,patch)=>{const c=menu.menu_data.categories.find(x=>x.id===cid);updateCategory(cid,{items:(c?.items||[]).map(i=>i.id===iid?{...i,...patch}:i)})};
+ const removeItem=(cid,iid)=>{const c=menu.menu_data.categories.find(x=>x.id===cid);updateCategory(cid,{items:(c?.items||[]).filter(i=>i.id!==iid)})};
+ const moveItem=(cid,i,d)=>{const c=menu.menu_data.categories.find(x=>x.id===cid);if(!c)return;const a=[...c.items],n=i+d;if(n<0||n>=a.length)return;[a[i],a[n]]=[a[n],a[i]];updateCategory(cid,{items:a})};
+ const runImport=async()=>{if(!importFiles.length||!menu)return;setImporting(true);setError("");try{let combined={title:"",subtitle:"",categories:[],warnings:[]};for(let i=0;i<importFiles.length;i++){const file=await compress(importFiles[i]);const body={file:await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(file)}),mimeType:file.type||"image/jpeg"};const headers={"Content-Type":"application/json",Authorization:`Bearer ${manager?getRestaurantToken():getAdminToken()}`};const response=await fetch("/api/extract-menu",{method:"POST",headers,body:JSON.stringify(body)});const data=await response.json();if(!response.ok)throw new Error(data.error||"AI extraction failed.");combined=mergeImported(combined,data.menu||data);combined.warnings=[...(combined.warnings||[]),...(data.menu?.warnings||data.warnings||[])]}setImported(combined)}catch(e){setError(e.message||"Could not read the menu.")}finally{setImporting(false)}};
+ const applyImport=()=>{if(!imported)return;setMenu(m=>mergeImported(m,imported));setImported(null);setImportFiles([]);setMessage("Imported content added. Review everything before saving.")};
+ const uploadBrand=async(type,file)=>{if(!file||!menu)return;try{const f=await compress(file,type==="logo"?900:1800,.82);const path=`digital-menus/${business.id}/${menu.id||"new"}-${type}-${Date.now()}.webp`;const url=manager?await uploadRestaurantMedia(f,path):await uploadMedia(f,path);updateMenu({[type==="logo"?"logo_url":"banner_url"]:url});setMessage(`${type==="logo"?"Logo":"Banner"} ready. Save the menu to keep it.`)}catch(e){setError(e.message||"Could not upload image.")}};
+ const saveStand=async()=>{setError("");try{if(!standDraft.menu_id)throw new Error("Choose a menu first.");const r=manager?await saveRestaurantStand(standDraft):await saveAdminStand(business.id,standDraft);setStands(prev=>[...prev.filter(s=>s.id!==r?.id),r]);setStandDraft({id:"",menu_id:"",stand_name:"NFC Stand",location:"",is_active:true});setMessage("NFC stand assignment saved.")}catch(e){setError(e.message||"Could not save stand.")}};
+ const copy=v=>navigator.clipboard?.writeText(v);
+ const createManager=async()=>{setManagerResult("");setError("");try{const r=await createRestaurantManager({businessId:business.id,email:managerEmail,password:managerPassword});setManagerResult(r.message||"Manager created.");setManagerPassword("")}catch(e){setError(e.message||"Could not create manager.")}};
+ if(loading)return <main className="menu-admin-page"><div className="menu-admin-loading">Loading…</div></main>;
+ if(error&&!business)return <main className="menu-admin-page"><div className="menu-admin-error"><h1>Digital Menu</h1><p>{error}</p></div></main>;
+ if(!business)return null;
+ return <main className="menu-admin-page">
+  <header className="menu-admin-top"><div><strong>{business.business_name}</strong><span>{manager?"RESTAURANT MANAGER":"HAKI OWNER ADMIN"}</span></div><div className="menu-admin-top-actions"><a href={`/p/${business.slug}`} target="_blank" rel="noreferrer">Profile <FaExternalLinkAlt/></a>{menu&&<a href={`/m/${business.slug}/${menu.slug}`} target="_blank" rel="noreferrer">Preview <FaExternalLinkAlt/></a>}{manager?<button onClick={()=>{clearRestaurantToken();window.location.href="/restaurant-login"}}><FaSignOutAlt/> Sign out</button>:<button onClick={()=>{setManagerEmail("");setManagerPassword("");setManagerResult("");setTab("access")}}>Restaurant Access</button>}{menu&&<button className="menu-save-top" onClick={save} disabled={saving}>{saving?<FaSave/>:<FaCheck/>} {saving?"Saving…":"Save"}</button>}</div></header>
+  <div className="menu-admin-layout"><nav className="menu-admin-nav"><button className={tab==="menus"?"active":""} onClick={()=>setTab("menus")}>Digital Menus</button>{menu&&<><button className={tab==="editor"?"active":""} onClick={()=>setTab("editor")}>Edit Menu</button><button className={tab==="branding"?"active":""} onClick={()=>setTab("branding")}>Branding</button></>}<button className={tab==="stands"?"active":""} onClick={()=>setTab("stands")}>NFC Stands</button>{!manager&&<button className={tab==="access"?"active":""} onClick={()=>setTab("access")}>Restaurant Access</button>}</nav>
+   <section className="menu-admin-content">
+    {tab==="menus"&&<><div className="menu-admin-heading"><div><h1>Digital Menus</h1><p>Create separate menus for different cuisines, rooms or services.</p></div><button className="menu-admin-primary" onClick={newMenu}><FaPlus/> Add Digital Menu</button></div><div className="menu-list">{menus.length===0?<div className="menu-empty"><FaUtensils/><h3>No digital menus yet</h3><p>Create one, then upload the restaurant's existing menu and let Haki organise it.</p><button onClick={newMenu}>Create first menu</button></div>:menus.map(m=><article className="menu-card" key={m.id}><div><span className="menu-card-kicker">DIGITAL MENU</span><h3>{m.title}</h3><p>{m.subtitle||m.slug}</p><small>{(m.menu_data?.categories||[]).reduce((n,c)=>n+(c.items?.length||0),0)} items · {m.theme?.preset||"Cafe Rio"}</small></div><div className="menu-card-actions"><button onClick={()=>selectMenu(m)}>Edit</button><a href={`/m/${business.slug}/${m.slug}`} target="_blank" rel="noreferrer">Preview</a><button onClick={()=>duplicate(m)}>Duplicate</button><button className="danger" onClick={()=>remove(m.id)}><FaTrash/></button></div></article>)}</div></>}
+    {tab==="editor"&&menu&&<><div className="menu-admin-heading"><div><span className="menu-admin-kicker">EDIT DIGITAL MENU</span><h1>{menu.title||"Menu"}</h1><p>The customer sees only saved, active items.</p></div><button className="menu-admin-secondary" onClick={()=>setTab("menus")}>Back to menus</button></div><div className="menu-field-grid"><label>Menu title<input value={menu.title} onChange={e=>updateMenu({title:e.target.value})}/></label><label>Menu URL slug<input value={menu.slug} onChange={e=>updateMenu({slug:slugify(e.target.value)})}/></label><label className="full">Subtitle<input value={menu.subtitle} onChange={e=>updateMenu({subtitle:e.target.value})}/></label></div><div className="theme-grid"><div><strong>Menu theme</strong><span>Each digital menu has its own look.</span></div><div className="theme-options">{Object.keys(THEMES).map(n=><button key={n} className={menu.theme?.preset===n?"active":""} onClick={()=>updateMenu({theme:{preset:n}})}>{n}</button>)}</div></div><div className="import-box"><div><FaMagic/><div><strong>Upload an existing menu</strong><span>Haki reads the menu, sorts categories and extracts dish names, descriptions and prices. Nothing is saved until you review it.</span></div></div><label className="menu-admin-secondary upload-label"><FaUpload/> Choose PDF/images<input type="file" accept="image/*,.pdf" multiple onChange={e=>setImportFiles(Array.from(e.target.files||[]))}/></label>{importFiles.length>0&&<button className="menu-admin-primary" onClick={runImport} disabled={importing}>{importing?"Reading menu…":"Scan with AI"}</button>}</div>{imported&&<div className="review-box"><div className="review-head"><div><strong>Review imported menu</strong><span>{imported.categories?.length||0} categories · {(imported.categories||[]).reduce((n,c)=>n+(c.items?.length||0),0)} items</span></div><button onClick={applyImport}><FaCheck/> Add to editor</button></div>{imported.warnings?.length>0&&<div className="warning">{imported.warnings.map((w,i)=><div key={i}>⚠ {w}</div>)}</div>}{(imported.categories||[]).map(c=><div className="review-category" key={c.name}><strong>{c.name}</strong><span>{(c.items||[]).map(i=>`${i.name}${i.price?` · ${i.price}`:""}`).join(" | ")}</span></div>)}</div>}<div className="editor-actions-row"><button className="menu-admin-primary" onClick={addCategory}><FaPlus/> Add Category</button><button className="menu-admin-primary" onClick={save} disabled={saving}><FaSave/> Save Menu</button></div>{menu.menu_data.categories.map((c,i)=><article className="category-editor" key={c.id}><header><div><span>{i+1}</span><input value={c.name} onChange={e=>updateCategory(c.id,{name:e.target.value})}/></div><div><button onClick={()=>moveCategory(i,-1)} disabled={!i}><FaArrowUp/></button><button onClick={()=>moveCategory(i,1)} disabled={i===menu.menu_data.categories.length-1}><FaArrowDown/></button><button className="danger" onClick={()=>removeCategory(c.id)}><FaTrash/></button></div></header>{(c.items||[]).map((item,j)=><div className="item-editor" key={item.id}><input value={item.name} onChange={e=>updateItem(c.id,item.id,{name:e.target.value})} placeholder="Dish name"/><input value={item.description} onChange={e=>updateItem(c.id,item.id,{description:e.target.value})} placeholder="Description"/><input value={item.price} onChange={e=>updateItem(c.id,item.id,{price:e.target.value})} placeholder="₹299"/><label><input type="checkbox" checked={item.available!==false} onChange={e=>updateItem(c.id,item.id,{available:e.target.checked})}/> Show</label><button onClick={()=>moveItem(c.id,j,-1)} disabled={!j}>↑</button><button onClick={()=>moveItem(c.id,j,1)} disabled={j===c.items.length-1}>↓</button><button className="danger" onClick={()=>removeItem(c.id,item.id)}><FaTrash/></button></div>)}<button className="add-item" onClick={()=>addItem(c.id)}><FaPlus/> Add dish</button></article>)}</>}
+    {tab==="branding"&&menu&&<><div className="menu-admin-heading"><div><h1>Menu Branding</h1><p>This branding belongs to this menu only. It does not change the Haki business profile.</p></div></div><div className="brand-grid"><div className="brand-upload"><strong>Menu Logo</strong>{menu.logo_url&&<img src={menu.logo_url} alt="Menu logo"/>}<label className="menu-admin-secondary upload-label"><FaUpload/> {menu.logo_url?"Change logo":"Upload logo"}<input type="file" accept="image/*" onChange={e=>uploadBrand("logo",e.target.files?.[0])}/></label></div><div className="brand-upload"><strong>Menu Banner</strong>{menu.banner_url&&<img src={menu.banner_url} alt="Menu banner"/>}<label className="menu-admin-secondary upload-label"><FaUpload/> {menu.banner_url?"Change banner":"Upload banner"}<input type="file" accept="image/*" onChange={e=>uploadBrand("banner",e.target.files?.[0])}/></label></div></div><div className="menu-field-grid"><label>Tagline<input value={menu.details.tagline} onChange={e=>updateMenu({details:{...menu.details,tagline:e.target.value}})}/></label><label>Address<input value={menu.details.address} onChange={e=>updateMenu({details:{...menu.details,address:e.target.value}})}/></label><label className="full">Story<textarea value={menu.details.story} onChange={e=>updateMenu({details:{...menu.details,story:e.target.value}})}/></label><label>Google review URL<input value={menu.details.googleReviewUrl} onChange={e=>updateMenu({details:{...menu.details,googleReviewUrl:e.target.value}})}/></label><label>Google Maps URL<input value={menu.details.mapUrl} onChange={e=>updateMenu({details:{...menu.details,mapUrl:e.target.value}})}/></label><label>Instagram URL<input value={menu.details.instagramUrl} onChange={e=>updateMenu({details:{...menu.details,instagramUrl:e.target.value}})}/></label></div><button className="menu-admin-primary" onClick={save}><FaSave/> Save Branding</button></>}
+    {tab==="stands"&&<><div className="menu-admin-heading"><div><h1>NFC Stands</h1><p>Assign each physical NFC stand to one specific digital menu.</p></div><button className="menu-admin-primary" onClick={()=>setStandDraft({id:"",menu_id:menus[0]?.id||"",stand_name:"NFC Stand",location:"",is_active:true})}><FaPlus/> New Stand</button></div><div className="stand-form"><label>Stand name<input value={standDraft.stand_name} onChange={e=>setStandDraft({...standDraft,stand_name:e.target.value})}/></label><label>Location<input value={standDraft.location} onChange={e=>setStandDraft({...standDraft,location:e.target.value})} placeholder="Table 4 / Punjabi section"/></label><label>Assigned menu<select value={standDraft.menu_id} onChange={e=>setStandDraft({...standDraft,menu_id:e.target.value})}><option value="">Choose menu</option>{menus.map(m=><option key={m.id} value={m.id}>{m.title}</option>)}</select></label><button className="menu-admin-primary" onClick={saveStand}><FaSave/> Save assignment</button></div><div className="stand-list">{stands.map(s=>{const m=menus.find(x=>x.id===s.menu_id);const url=`${base}/s/${s.stand_token}`;return <article key={s.id}><div><strong>{s.stand_name}</strong><span>{s.location||"No location"} · {m?.title||"Menu missing"}</span></div><div><button onClick={()=>setStandDraft(s)}>Edit</button><button onClick={()=>{copy(url);setMessage("Stand URL copied.")}}><FaCopy/> Copy NFC URL</button><a href={url} target="_blank" rel="noreferrer"><FaExternalLinkAlt/> Test</a></div></article>})}</div></>}
+    {!manager&&tab==="access"&&<><div className="menu-admin-heading"><div><h1>Restaurant Access</h1><p>Create one Supabase Auth login for the restaurant manager. They will only see this business.</p></div></div><div className="access-box"><label>Manager email<input type="email" value={managerEmail} onChange={e=>setManagerEmail(e.target.value)} placeholder="manager@restaurant.com"/></label><label>Temporary password<input type="password" value={managerPassword} onChange={e=>setManagerPassword(e.target.value)} placeholder="At least 8 characters"/></label><button className="menu-admin-primary" onClick={createManager}>Create Manager Login</button>{managerResult&&<div className="success"><FaCheck/> {managerResult}</div>}<p>Share <strong>/restaurant-login</strong> and the credentials with the restaurant manager. Do not put the login button on the public customer profile.</p></div></>}
+    {message&&<div className="menu-toast">{message}</div>}{error&&<div className="menu-error">{error}</div>}
+   </section></div>
+ </main>;
 }
