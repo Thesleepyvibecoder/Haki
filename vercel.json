@@ -1,8 +1,20 @@
 {
   "rewrites": [
-    { "source": "/p/(.*)", "destination": "/index.html" },
-    { "source": "/a/(.*)", "destination": "/index.html" },
-    { "source": "/admin", "destination": "/index.html" },
-    { "source": "/menu-admin/(.*)", "destination": "/index.html" }
+    {
+      "source": "/p/(.*)",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/a/(.*)",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/admin",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/menu-admin/(.*)",
+      "destination": "/index.html"
+    }
   ]
 }
