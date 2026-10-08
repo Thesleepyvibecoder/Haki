@@ -1,6 +1,5 @@
 const MENU_SCHEMA = {
   type: "object",
-  additionalProperties: false,
   properties: {
     title: { type: "string" },
     subtitle: { type: "string" },
@@ -8,14 +7,12 @@ const MENU_SCHEMA = {
       type: "array",
       items: {
         type: "object",
-        additionalProperties: false,
         properties: {
           name: { type: "string" },
           items: {
             type: "array",
             items: {
               type: "object",
-              additionalProperties: false,
               properties: {
                 name: { type: "string" },
                 description: { type: "string" },
@@ -44,7 +41,9 @@ function send(res, status, body) {
 async function verifyMenuToken(token) {
   const supabaseUrl = process.env.VITE_SUPABASE_URL;
   const supabaseKey = process.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-  if (!supabaseUrl || !supabaseKey) throw new Error("Supabase configuration is missing on the server.");
+  if (!supabaseUrl || !supabaseKey) {
+    throw new Error("Supabase configuration is missing on the server.");
+  }
 
   const response = await fetch(`${supabaseUrl}/rest/v1/rpc/get_digital_menu_admin`, {
     method: "POST",
@@ -56,7 +55,11 @@ async function verifyMenuToken(token) {
     body: JSON.stringify({ p_token: token })
   });
 
-  if (!response.ok) throw new Error("Could not verify the menu link.");
+  if (!response.ok) {
+    const detail = await response.text().catch(() => "");
+    throw new Error(`Could not verify the menu link.${detail ? ` ${detail.slice(0, 300)}` : ""}`);
+  }
+
   const data = await response.json();
   return data?.[0] || data || null;
 }
@@ -73,10 +76,14 @@ export default async function handler(req, res) {
   try {
     const { token, image } = req.body || {};
 
-    if (!token || typeof token !== "string") return send(res, 400, { error: "Invalid menu link." });
+    if (!token || typeof token !== "string") {
+      return send(res, 400, { error: "Invalid menu link." });
+    }
+
     if (!image || typeof image !== "string" || !image.startsWith("data:image/")) {
       return send(res, 400, { error: "Please upload a valid menu image." });
     }
+
     if (image.length > 6_000_000) {
       return send(res, 413, { error: "This menu image is too large. Please use a smaller image." });
     }
@@ -85,7 +92,9 @@ export default async function handler(req, res) {
 
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
-      return send(res, 503, { error: "Menu AI is not configured yet. Add GEMINI_API_KEY to the Vercel environment variables." });
+      return send(res, 503, {
+        error: "Menu AI is not configured yet. Add GEMINI_API_KEY to the Vercel environment variables."
+      });
     }
 
     const media = parseDataImage(image);
@@ -106,35 +115,47 @@ Rules:
 - The result will be reviewed by a restaurant owner before it is saved.
 - Return every visible category and dish you can read. Do not summarize or omit items merely because the menu is long.`;
 
-    const response = await fetch(
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent",
-      {
-        method: "POST",
-        headers: {
-          "x-goog-api-key": apiKey,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          contents: [{
-            role: "user",
-            parts: [
-              { text: prompt },
-              { inlineData: { mimeType: media.mimeType, data: media.data } }
-            ]
-          }],
-          generationConfig: {
-            responseMimeType: "application/json",
-            responseSchema: MENU_SCHEMA,
-            temperature: 0
-          }
-        })
-      }
-    );
+    const model = process.env.GEMINI_MENU_MODEL || "gemini-2.5-flash-lite";
+    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`;
 
-    const data = await response.json();
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        contents: [{
+          role: "user",
+          parts: [
+            { text: prompt },
+            { inlineData: { mimeType: media.mimeType, data: media.data } }
+          ]
+        }],
+        generationConfig: {
+          responseMimeType: "application/json",
+          responseSchema: MENU_SCHEMA,
+          temperature: 0
+        }
+      })
+    });
+
+    const raw = await response.text();
+    let data = null;
+    try {
+      data = raw ? JSON.parse(raw) : null;
+    } catch {
+      data = null;
+    }
+
     if (!response.ok) {
+      const providerMessage = data?.error?.message || raw?.slice(0, 800) || "No provider error message was returned.";
+      console.error("Gemini menu extraction failed:", {
+        status: response.status,
+        model,
+        message: providerMessage
+      });
       return send(res, 502, {
-        error: data?.error?.message || "The Gemini menu service could not process this image."
+        error: `Gemini error (${response.status}): ${providerMessage}`
       });
     }
 
@@ -143,15 +164,22 @@ Rules:
       ?.map((part) => part.text)
       ?.join("") || "";
 
+    if (!outputText) {
+      console.error("Gemini returned no text output:", JSON.stringify(data).slice(0, 2000));
+      return send(res, 502, { error: "Gemini returned no menu data. Please try the image again." });
+    }
+
     let parsed;
     try {
-      parsed = JSON.parse(outputText || "{}");
-    } catch {
+      parsed = JSON.parse(outputText);
+    } catch (error) {
+      console.error("Gemini returned invalid JSON:", outputText.slice(0, 2000));
       return send(res, 502, { error: "Gemini returned an unreadable menu result. Please try the image again." });
     }
 
     return send(res, 200, { menu: parsed });
   } catch (error) {
+    console.error("Menu extraction server error:", error);
     return send(res, 500, { error: error?.message || "Could not digitalize the menu." });
   }
 }
