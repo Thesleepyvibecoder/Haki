@@ -3,6 +3,7 @@ import { About, Contact, Experience, Feedbacks, Hero, Navbar, Tech, Works, Stars
 import Profile from "./pages/Profile";
 import Analytics from "./pages/Analytics";
 import Admin from "./pages/Admin";
+import MenuAdmin from "./pages/MenuAdmin";
 
 const Home = () => (
   <div className='relative z-0 bg-primary'>
@@ -32,6 +33,7 @@ const App = () => (
       <Route path="/p/:slug" element={<ProfileRoute />} />
       <Route path="/a/:token" element={<AnalyticsRoute />} />
       <Route path="/admin" element={<Admin />} />
+      <Route path="/menu-admin/:token" element={<MenuAdmin />} />
     </Routes>
   </BrowserRouter>
 );

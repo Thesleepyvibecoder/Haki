@@ -189,3 +189,20 @@ export async function deleteBusiness(id) {
     body: JSON.stringify({ p_business_id: id }),
   }, token);
 }
+
+export async function getDigitalMenuAdminByToken(token) {
+  if (!token) throw new Error("Invalid menu link.");
+  const rows = await supabaseFetch("/rpc/get_digital_menu_admin", {
+    method: "POST",
+    body: JSON.stringify({ p_token: token }),
+  });
+  return rows?.[0] || rows || null;
+}
+
+export async function saveDigitalMenuByToken(token, payload) {
+  if (!token) throw new Error("Invalid menu link.");
+  return supabaseFetch("/rpc/save_digital_menu", {
+    method: "POST",
+    body: JSON.stringify({ p_token: token, p_payload: payload }),
+  });
+}
