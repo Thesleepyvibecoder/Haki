@@ -31,3 +31,56 @@
 .admin-file-input{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important;opacity:0!important}
 .admin-file-input:focus + .admin-upload-button{outline:2px solid #087bff;outline-offset:2px}
 .admin-menu-access{border:1px solid #eadfd5;background:#fffaf5;border-radius:14px;padding:16px;margin-bottom:18px}.admin-menu-access label{display:grid;gap:7px;margin-bottom:12px;font-weight:700}.admin-menu-access select,.admin-menu-access input{height:42px;border:1px solid #d9cfc5;border-radius:9px;padding:0 11px;background:#fff}.admin-menu-access p{margin:4px 0 0;color:#7a6c61;font-size:13px;line-height:1.5}
+
+/* Haki Admin light theme: align the owner dashboard with Manage Menu. */
+.admin-page{background:radial-gradient(circle at 12% 0%,rgba(141,94,61,.055),transparent 30%),#f5f6f8;color:#172033}
+.admin-brand span,.admin-kicker{color:#667085}
+.admin-ghost{background:#fff;border-color:#d9dee7;color:#344054;box-shadow:0 1px 2px rgba(16,24,40,.03)}
+.admin-panel,.admin-login-card{background:#fff;border-color:#e1e5eb;box-shadow:0 12px 36px rgba(16,24,40,.06)}
+.admin-panel-heading>svg{color:#8d5e3d}
+.admin-count{background:#f8fafc;border-color:#e1e5eb;color:#667085}
+.admin-help{color:#667085}
+.admin-section-title{border-top-color:#eaecf0;color:#344054}
+.admin-form label,.admin-login-card label{color:#475467}
+.admin-form input,.admin-login-card input{background:#fff;border-color:#d0d5dd;color:#172033}
+.admin-form input:focus,.admin-login-card input:focus{border-color:#98a2b3;box-shadow:0 0 0 3px rgba(141,94,61,.10)}
+.admin-muted{color:#667085}
+.admin-preview-url{background:#f8fafc;border-color:#d0d5dd}
+.admin-preview-url span{color:#667085}
+.admin-preview-url code{color:#344054}
+.admin-primary{background:#172033;box-shadow:0 6px 16px rgba(16,24,40,.08)}
+.admin-success{background:#ecfdf3;color:#027a48;border-color:#abefc6}
+.admin-error{background:#fef3f2;color:#b42318;border-color:#fecdca}
+.admin-upload-box{border-color:#e1e5eb;background:#f9fafb}
+.admin-upload-heading>svg{color:#8d5e3d}
+.admin-upload-heading strong{color:#344054}
+.admin-upload-heading span{color:#667085}
+.admin-upload-button{background:#fff;border-color:#d0d5dd;color:#344054!important}
+.admin-upload-button:hover{border-color:#8d5e3d;color:#172033!important}
+.admin-file{border-color:#e1e5eb;background:#fff;color:#475467}
+.admin-list .admin-business{border-color:#e1e5eb;background:#fff;box-shadow:0 1px 2px rgba(16,24,40,.025)}
+.admin-business strong{color:#172033}
+.admin-business span{color:#667085}
+.admin-links a,.admin-links button{color:#344054;background:#f8fafc;border-color:#e1e5eb}
+.admin-links a:hover,.admin-links button:hover{border-color:#c6a58b;color:#172033;background:#fff}
+.admin-links .admin-delete{color:#b42318;border-color:#fecdca;background:#fff}
+.admin-links .admin-delete:hover{border-color:#fda29b;color:#912018;background:#fef3f2}
+.admin-state{background:#f5f6f8;color:#172033}
+.admin-theme-box{border-color:#e1e5eb;background:linear-gradient(145deg,#fff,#f8fafc);box-shadow:inset 0 1px 0 rgba(16,24,40,.02)}
+.admin-theme-presets button{border-color:#d0d5dd;background:#fff;color:#344054}
+.admin-theme-presets button:hover{border-color:#c6a58b;background:#f9fafb}
+.admin-theme-presets button.active{border-color:#8d5e3d;box-shadow:0 0 0 2px rgba(141,94,61,.12);background:#fdf8f4}
+.admin-theme-grid label{color:#475467!important}
+.admin-theme-grid input[type="color"],.admin-theme-grid input[type="number"],.admin-theme-grid select{background:#fff;border-color:#d0d5dd;color:#172033}
+.admin-theme-box .admin-muted{color:#667085}
+.admin-theme-intro strong{color:#172033}
+.admin-theme-intro span{color:#667085}
+.admin-theme-advanced,.admin-theme-more{border-color:#e1e5eb;background:#f9fafb}
+.admin-theme-advanced summary,.admin-theme-more summary{color:#344054}
+.admin-theme-advanced summary:after,.admin-theme-more summary:after{color:#667085}
+.admin-menu-access{border-color:#e1e5eb;background:#f8fafc;box-shadow:inset 0 1px 0 rgba(255,255,255,.8)}
+.admin-menu-access label{color:#344054!important;font-size:13px}
+.admin-menu-access select,.admin-menu-access input{background:#fff;border-color:#d0d5dd;color:#172033;outline:none}
+.admin-menu-access select:focus,.admin-menu-access input:focus{border-color:#8d5e3d;box-shadow:0 0 0 3px rgba(141,94,61,.10)}
+.admin-menu-access p{color:#475467;font-size:13px;line-height:1.6}
+.admin-menu-access p strong{color:#172033}
