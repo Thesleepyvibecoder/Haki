@@ -69,13 +69,16 @@ export default async function handler(req, res) {
     const caller = await request("/auth/v1/user", {}, { accessToken });
     if (!caller?.id) throw new Error("Could not verify the signed-in Haki admin.");
 
-    // Use server-side elevated access only after identifying the caller.
-    const admins = await request(
-      `/rest/v1/haki_admin_users?select=user_id&user_id=eq.${encodeURIComponent(caller.id)}&limit=1`,
-      {},
-      { admin: true }
+    // The migration intentionally revokes direct table access to haki_admin_users.
+    // Check the caller through the existing SECURITY DEFINER RPC instead. It runs
+    // as the authenticated caller, so auth.uid() resolves to this user's ID, while
+    // the function itself safely reads the protected table.
+    const isAdmin = await request(
+      "/rest/v1/rpc/is_haki_admin",
+      { method: "POST", body: JSON.stringify({}) },
+      { accessToken }
     );
-    if (!admins?.[0]) throw new Error("Only Haki admins can create restaurant access.");
+    if (isAdmin !== true) throw new Error("Only Haki admins can create restaurant access.");
 
     const { businessId, email: rawEmail, password } = req.body || {};
     const email = String(rawEmail || "").trim().toLowerCase();
