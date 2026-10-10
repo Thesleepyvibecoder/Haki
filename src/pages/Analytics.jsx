@@ -77,7 +77,7 @@ function LineChart({ data, metric, emptyLabel }) {
   );
 }
 
-export default function Analytics({ token }) {
+export default function Analytics({ token, embedded = false }) {
   const [range, setRange] = useState(7);
   const [data, setData] = useState(null);
   const [status, setStatus] = useState("loading");
@@ -101,8 +101,8 @@ export default function Analytics({ token }) {
       .sort((a, b) => b.value - a.value);
   }, [data]);
 
-  if (status === "loading" && !data) return <div className="analytics-state">Loading analytics...</div>;
-  if (status === "error" || !data) return <div className="analytics-state"><h1>Analytics unavailable</h1><p>Check the analytics link and try again.</p></div>;
+  if (status === "loading" && !data) return <div className={`analytics-state${embedded ? " analytics-state-embedded" : ""}`}>Loading analytics...</div>;
+  if (status === "error" || !data) return <div className={`analytics-state${embedded ? " analytics-state-embedded" : ""}`}><h1>Analytics unavailable</h1><p>{!token ? "An analytics token is not configured for this business." : "Check the analytics link and try again."}</p></div>;
 
   const counts = data.counts || {};
   const profileViews = Number(counts.profile_view || 0);
@@ -114,8 +114,11 @@ export default function Analytics({ token }) {
   const recent = data.recent || [];
   const selectedLabel = RANGE_OPTIONS.find((item) => item.days === range)?.label || "7 Days";
 
+  const PageWrapper = embedded ? "div" : "main";
+
   return (
-    <main className="analytics-page">
+    <PageWrapper className={`analytics-page${embedded ? " analytics-page-embedded" : ""}`}>
+
       <div className="analytics-shell">
         <header className="analytics-header">
           <div className="analytics-brand">
@@ -186,6 +189,6 @@ export default function Analytics({ token }) {
 
         <footer className="analytics-footer">Powered by <strong>Haki</strong> · Analytics update as people interact with the profile.</footer>
       </div>
-    </main>
+    </PageWrapper>
   );
 }
