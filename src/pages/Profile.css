@@ -170,7 +170,6 @@
 
 
 /* ===== MENU POPUP ===== */
-
 .menu-modal {
   position: fixed;
   inset: 0;
@@ -178,18 +177,21 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 24px;
-  background: rgba(35, 24, 18, 0.72);
+  padding: 8px;
+  background: rgba(35, 24, 18, 0.76);
+  -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
 }
 
 .menu-modal-card {
   position: relative;
-  width: min(92vw, 900px);
-  height: min(90vh, 900px);
+  width: min(100%, 900px);
+  height: min(94vh, 1000px);
+  height: min(94dvh, 1000px);
+  min-height: 0;
   background: #fffaf3;
   border: 1px solid #dcc7b0;
-  border-radius: 22px;
+  border-radius: 18px;
   box-shadow: 0 24px 80px rgba(45, 28, 18, 0.35);
   overflow: hidden;
   display: flex;
@@ -198,115 +200,161 @@
 
 .menu-modal-header {
   flex: 0 0 auto;
+  min-height: 60px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 20px;
+  gap: 12px;
+  padding: 10px 16px;
   background: #fffaf3;
   border-bottom: 1px solid #e5d4c1;
   color: #2b1c14;
 }
 
-.menu-modal-header > div {
-  font-size: 18px;
-  font-weight: 700;
+.menu-modal-heading {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-width: 0;
+  font-size: 1rem;
+  line-height: 1.2;
+}
+
+.menu-modal-kicker {
+  flex: 0 0 auto;
+  font-size: 0.78em;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #8b5e43;
+}
+
+.menu-modal-title {
+  min-width: 0;
+  font-size: 1em;
+  font-weight: 750;
+  overflow-wrap: anywhere;
 }
 
 .menu-close {
+  flex: 0 0 auto;
   border: none;
   background: transparent;
   color: #5b3523;
-  font-size: 24px;
+  font-size: 25px;
+  line-height: 1;
   cursor: pointer;
-  padding: 4px 8px;
+  padding: 6px;
+  display: grid;
+  place-items: center;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .menu-image-wrap {
   position: relative;
-  flex: 1;
+  flex: 1 1 auto;
+  min-width: 0;
   min-height: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 18px 60px;
+  padding: 8px;
   background: #f8efe2;
-  overflow: auto;
+  overflow: hidden;
+  touch-action: pan-y;
 }
 
 .menu-image {
   display: block;
-  width: auto;
-  height: auto;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
   max-width: 100%;
-  max-height: none;
+  max-height: 100%;
   object-fit: contain;
-  border-radius: 8px;
-  box-shadow: 0 8px 30px rgba(45, 28, 18, 0.15);
+  object-position: center;
+  border-radius: 3px;
 }
 
 .menu-nav {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
+  z-index: 2;
   width: 42px;
   height: 42px;
   border: 1px solid #d8bfa8;
   border-radius: 50%;
-  background: rgba(255, 250, 243, 0.95);
+  background: rgba(255, 250, 243, 0.96);
   color: #6b3d24;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   box-shadow: 0 5px 18px rgba(45, 28, 18, 0.16);
+  -webkit-tap-highlight-color: transparent;
 }
 
-.menu-prev {
-  left: 14px;
+.menu-prev { left: 8px; }
+.menu-next { right: 8px; }
+
+@media (hover: hover) and (pointer: fine) {
+  .menu-nav:hover {
+    background: #a85f36;
+    color: white;
+  }
 }
 
-.menu-next {
-  right: 14px;
-}
-
-.menu-nav:hover {
-  background: #a85f36;
-  color: white;
+.menu-nav:active {
+  transform: translateY(-50%) scale(0.96);
 }
 
 .menu-page-count {
   flex: 0 0 auto;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   text-align: center;
-  padding: 10px;
+  padding: 7px 10px;
   background: #fffaf3;
   color: #6b4a38;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 700;
   border-top: 1px solid #e5d4c1;
 }
 
-/* Mobile */
 @media (max-width: 600px) {
   .menu-modal {
-    padding: 12px;
+    padding: 6px;
   }
 
   .menu-modal-card {
-    width: 96vw;
-    height: 92vh;
-    border-radius: 18px;
+    width: 100%;
+    height: 94vh;
+    height: 94dvh;
+    border-radius: 16px;
   }
 
   .menu-modal-header {
-    padding: 13px 15px;
+    min-height: 54px;
+    padding: 8px 12px;
   }
 
-  .menu-modal-header > div {
-    font-size: 16px;
+  .menu-modal-heading {
+    gap: 7px;
+    font-size: 15px;
+  }
+
+  .menu-close {
+    font-size: 23px;
+    padding: 5px;
   }
 
   .menu-image-wrap {
-    padding: 12px 42px;
+    padding: 4px;
   }
 
   .menu-nav {
@@ -314,30 +362,15 @@
     height: 36px;
   }
 
-  .menu-prev {
-    left: 8px;
-  }
+  .menu-prev { left: 6px; }
+  .menu-next { right: 6px; }
 
-  .menu-next {
-    right: 8px;
+  .menu-page-count {
+    min-height: 40px;
+    font-size: 13px;
   }
 }
 
-@media (min-width: 601px) {
-  .menu-modal-card {
-    height: 92vh;
-  }
-
-  .menu-image-wrap {
-    overflow-y: auto;
-    overflow-x: hidden;
-  }
-
-  .menu-image {
-    max-width: 100%;
-    height: auto;
-  }
-}
 /* ===== BUSINESS BRANDING ===== */
 .profile-page {
   background: var(--profile-bg, #f3eadf);
@@ -679,65 +712,4 @@
     var(--profile-accent, #925332) 4%,
     var(--profile-card-bg, #fffaf3)
   );
-}
-
-
-/* iOS Safari touch fix: keep the configured button style after tapping.
-   The previous touch override forced links to a pale background, which
-   made solid buttons look white and could leave that appearance stuck. */
-@media (hover: none), (pointer: coarse), (-webkit-touch-callout: none) {
-  .profile-save:hover,
-  .profile-save:focus,
-  .profile-save:focus-visible {
-    background: var(--profile-button-bg, #925332);
-    color: var(--profile-button-text, #fffaf5);
-    border-color: var(--profile-button-border, #8a4c2d);
-    transform: none;
-    box-shadow: 0 10px 28px rgba(146, 83, 50, 0.18);
-    outline: none;
-  }
-
-  .profile-link.profile-button-solid:hover,
-  .profile-link.profile-button-solid:focus,
-  .profile-link.profile-button-solid:focus-visible {
-    background: var(--profile-button-bg, #925332);
-    color: var(--profile-button-text, #fffaf5);
-    border-color: var(--profile-button-border, #8a4c2d);
-    transform: none;
-    box-shadow: none;
-    outline: none;
-  }
-
-  .profile-link.profile-button-outline:hover,
-  .profile-link.profile-button-outline:focus,
-  .profile-link.profile-button-outline:focus-visible {
-    background: transparent;
-    color: var(--profile-text, #2b1c14);
-    border-color: var(--profile-button-border, #8a4c2d);
-    transform: none;
-    box-shadow: none;
-    outline: none;
-  }
-
-  .profile-link.profile-button-soft:hover,
-  .profile-link.profile-button-soft:focus,
-  .profile-link.profile-button-soft:focus-visible {
-    background: color-mix(in srgb, var(--profile-accent, #925332) 12%, var(--profile-card-bg, #fffaf3));
-    color: var(--profile-text, #2b1c14);
-    border-color: color-mix(in srgb, var(--profile-accent, #925332) 35%, var(--profile-card-border, #dfcbb7));
-    transform: none;
-    box-shadow: none;
-    outline: none;
-  }
-
-  .profile-save,
-  .profile-link {
-    -webkit-tap-highlight-color: transparent;
-    touch-action: manipulation;
-  }
-
-  .profile-save:active,
-  .profile-link:active {
-    filter: brightness(0.96);
-  }
 }

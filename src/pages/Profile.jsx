@@ -50,7 +50,7 @@ function moduleAnalyticsKey(module) {
 
 function normalizeLink(type, value) {
   if (!value) return null;
-  if (type === "phone" || type === "call") return `tel:${String(value).replace(/[^+\d]/g, "")}`;
+  if (type === "phone") return `tel:${value.replace(/[^+\d]/g, "")}`;
   if (type === "whatsapp") return `https://wa.me/${value.replace(/[^\d]/g, "")}`;
   if (type === "email") return `mailto:${value.trim()}`;
   if (/^https?:\/\//i.test(value)) return value;
@@ -369,11 +369,14 @@ export default function Profile({ slug }) {
         <div className="menu-modal" role="dialog" aria-modal="true" aria-label={`${business.business_name} menu`} onClick={() => setMenuOpen(false)}>
           <div className="menu-modal-card" onClick={(event) => event.stopPropagation()}>
             <header className="menu-modal-header">
-              <div><span>MENU</span><strong>{business.business_name}</strong></div>
-              <button className="menu-close" onClick={() => setMenuOpen(false)} aria-label="Close menu"><FaTimes /></button>
+              <div className="menu-modal-heading">
+                <span className="menu-modal-kicker">Menu</span>
+                <strong className="menu-modal-title">{business.business_name}</strong>
+              </div>
+              <button type="button" className="menu-close" onClick={() => setMenuOpen(false)} aria-label="Close menu"><FaTimes /></button>
             </header>
             <div className="menu-image-wrap" onTouchStart={handleMenuTouchStart} onTouchEnd={handleMenuTouchEnd}>
-              <img src={menuImages[menuIndex]} alt={`Menu page ${menuIndex + 1}`} />
+              <img className="menu-image" src={menuImages[menuIndex]} alt={`Menu page ${menuIndex + 1}`} />
               {menuImages.length > 1 && (
                 <>
                   <button className="menu-nav menu-prev" onClick={previousMenu} aria-label="Previous menu page"><FaArrowLeft /></button>
