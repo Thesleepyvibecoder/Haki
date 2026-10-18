@@ -680,3 +680,46 @@
     var(--profile-card-bg, #fffaf3)
   );
 }
+
+
+/* Touch-device fix: prevent Safari from keeping hover styles after a tap. */
+@media (hover: none), (pointer: coarse) {
+  .profile-save:hover {
+    background: var(--profile-button-bg, #925332);
+    transform: none;
+    box-shadow: 0 10px 28px rgba(146, 83, 50, 0.18);
+  }
+
+  .profile-link:hover {
+    transform: none;
+    border-color: var(--profile-button-border, #dfcbb7);
+    background: color-mix(
+      in srgb,
+      var(--profile-card-bg, #fffaf3)
+      calc(var(--profile-card-opacity, 1) * 72%),
+      transparent
+    );
+    box-shadow: none;
+  }
+
+  .profile-save,
+  .profile-link {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .profile-save:active,
+  .profile-link:active {
+    filter: brightness(0.96);
+  }
+}
+
+/* Keep hover animation only on devices that support real hover. */
+@media (hover: hover) and (pointer: fine) {
+  .profile-save:hover {
+    transform: translateY(-1px);
+  }
+
+  .profile-link:hover {
+    transform: translateY(-1px);
+  }
+}

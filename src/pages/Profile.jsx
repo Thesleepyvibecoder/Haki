@@ -50,7 +50,7 @@ function moduleAnalyticsKey(module) {
 
 function normalizeLink(type, value) {
   if (!value) return null;
-  if (type === "phone") return `tel:${value.replace(/[^+\d]/g, "")}`;
+  if (type === "phone" || type === "call") return `tel:${String(value).replace(/[^+\d]/g, "")}`;
   if (type === "whatsapp") return `https://wa.me/${value.replace(/[^\d]/g, "")}`;
   if (type === "email") return `mailto:${value.trim()}`;
   if (/^https?:\/\//i.test(value)) return value;
