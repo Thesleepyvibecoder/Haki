@@ -682,44 +682,62 @@
 }
 
 
-/* Touch-device fix: prevent Safari from keeping hover styles after a tap. */
-@media (hover: none), (pointer: coarse) {
-  .profile-save:hover {
+/* iOS Safari touch fix: keep the configured button style after tapping.
+   The previous touch override forced links to a pale background, which
+   made solid buttons look white and could leave that appearance stuck. */
+@media (hover: none), (pointer: coarse), (-webkit-touch-callout: none) {
+  .profile-save:hover,
+  .profile-save:focus,
+  .profile-save:focus-visible {
     background: var(--profile-button-bg, #925332);
+    color: var(--profile-button-text, #fffaf5);
+    border-color: var(--profile-button-border, #8a4c2d);
     transform: none;
     box-shadow: 0 10px 28px rgba(146, 83, 50, 0.18);
+    outline: none;
   }
 
-  .profile-link:hover {
+  .profile-link.profile-button-solid:hover,
+  .profile-link.profile-button-solid:focus,
+  .profile-link.profile-button-solid:focus-visible {
+    background: var(--profile-button-bg, #925332);
+    color: var(--profile-button-text, #fffaf5);
+    border-color: var(--profile-button-border, #8a4c2d);
     transform: none;
-    border-color: var(--profile-button-border, #dfcbb7);
-    background: color-mix(
-      in srgb,
-      var(--profile-card-bg, #fffaf3)
-      calc(var(--profile-card-opacity, 1) * 72%),
-      transparent
-    );
     box-shadow: none;
+    outline: none;
+  }
+
+  .profile-link.profile-button-outline:hover,
+  .profile-link.profile-button-outline:focus,
+  .profile-link.profile-button-outline:focus-visible {
+    background: transparent;
+    color: var(--profile-text, #2b1c14);
+    border-color: var(--profile-button-border, #8a4c2d);
+    transform: none;
+    box-shadow: none;
+    outline: none;
+  }
+
+  .profile-link.profile-button-soft:hover,
+  .profile-link.profile-button-soft:focus,
+  .profile-link.profile-button-soft:focus-visible {
+    background: color-mix(in srgb, var(--profile-accent, #925332) 12%, var(--profile-card-bg, #fffaf3));
+    color: var(--profile-text, #2b1c14);
+    border-color: color-mix(in srgb, var(--profile-accent, #925332) 35%, var(--profile-card-border, #dfcbb7));
+    transform: none;
+    box-shadow: none;
+    outline: none;
   }
 
   .profile-save,
   .profile-link {
     -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
   }
 
   .profile-save:active,
   .profile-link:active {
     filter: brightness(0.96);
-  }
-}
-
-/* Keep hover animation only on devices that support real hover. */
-@media (hover: hover) and (pointer: fine) {
-  .profile-save:hover {
-    transform: translateY(-1px);
-  }
-
-  .profile-link:hover {
-    transform: translateY(-1px);
   }
 }
