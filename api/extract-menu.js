@@ -12,9 +12,9 @@ async function supabase(path, options={}, token=SUPABASE_SECRET){
 async function getAuthUser(token){return supabase("/auth/v1/user",{headers:{Authorization:`Bearer ${token}`}},token)}
 async function allowed(token){
   const user=await getAuthUser(token);
-  const rows=await supabase(`/rest/v1/restaurant_users?select=business_id&auth_user_id=eq.${encodeURIComponent(user.id)}&is_active=eq.true&limit=1`);
+  const rows=await supabase(`/rest/v1/restaurant_users?select=business_id&auth_user_id=eq.${encodeURIComponent(user.id)}&is_active=eq.true&limit=1`, {}, token);
   if(rows?.[0]) return {role:"manager",businessId:rows[0].business_id};
-  const admins=await supabase(`/rest/v1/haki_admin_users?select=user_id&user_id=eq.${encodeURIComponent(user.id)}&limit=1`);
+  const admins=await supabase(`/rest/v1/haki_admin_users?select=user_id&user_id=eq.${encodeURIComponent(user.id)}&limit=1`, {}, token);
   if(admins?.[0]) return {role:"admin",businessId:null};
   throw new Error("You are not authorised to import menus.");
 }
