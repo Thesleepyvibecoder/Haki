@@ -137,7 +137,7 @@ export default function Profile({ slug }) {
     ? configuredModules.map((module) => {
         const Icon = moduleIcons[module.type] || FaGlobe;
         if (module.type === "menu" || module.type === "payment") return { ...module, key: module.type, Icon, href: null };
-        const value = module.type === "call" ? business.phone : module.type === "email" ? business.email : module.value;
+        const value = module.type === "call" ? (module.value || business.phone) : module.type === "email" ? (module.value || business.email) : module.value;
         return { ...module, key: module.type, Icon, href: normalizeLink(module.type === "google_review" ? "google_review_url" : module.type, value) };
       }).filter((item) => (item.type === "menu" && menuAvailable) || (item.type === "payment" && (business.upi_id || business.payment_qr_url)) || item.href)
     : coreLinks.map(([key, label, Icon]) => ({ key, label, Icon, value: business[key], href: normalizeLink(key, business[key]), type: key }))
