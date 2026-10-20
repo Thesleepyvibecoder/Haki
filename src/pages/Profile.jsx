@@ -271,9 +271,11 @@ export default function Profile({ slug }) {
         {business.person_name && <p className="profile-person">{business.person_name}</p>}
         {business.bio && <p className="profile-bio">{business.bio}</p>}
 
-        <button className={`profile-save profile-button-${theme.buttonStyle}`} onClick={saveContact}>
-          <FaRegAddressCard /> Save Contact
-        </button>
+        {theme.showSaveContact !== false && (
+          <button className={`profile-save profile-button-${theme.buttonStyle}`} onClick={saveContact}>
+            <FaRegAddressCard /> Save Contact
+          </button>
+        )}
 
         <div className="profile-links">
           {links.map(({ key, label, Icon, href }) => (
