@@ -50,9 +50,19 @@ function moduleAnalyticsKey(module) {
 
 function normalizeLink(type, value) {
   if (!value) return null;
-  if (type === "phone") return `tel:${value.replace(/[^+\d]/g, "")}`;
-  if (type === "whatsapp") return `https://wa.me/${value.replace(/[^\d]/g, "")}`;
-  if (type === "email") return `mailto:${value.trim()}`;
+  const normalizedType = String(type || "").toLowerCase();
+  if (normalizedType === "phone" || normalizedType === "call") {
+    const raw = String(value).trim();
+    const hasPlus = raw.startsWith("+");
+    let digits = raw.replace(/\D/g, "");
+    if (!digits) return null;
+    // Accept numbers entered as +91..., 91..., or a local 10-digit Indian number.
+    if (hasPlus) return `tel:+${digits}`;
+    if (digits.length === 10) digits = `91${digits}`;
+    return `tel:+${digits}`;
+  }
+  if (normalizedType === "whatsapp") return `https://wa.me/${String(value).replace(/\D/g, "")}`;
+  if (normalizedType === "email") return `mailto:${String(value).trim()}`;
   if (/^https?:\/\//i.test(value)) return value;
   return `https://${value}`;
 }
@@ -137,7 +147,7 @@ export default function Profile({ slug }) {
     ? configuredModules.map((module) => {
         const Icon = moduleIcons[module.type] || FaGlobe;
         if (module.type === "menu" || module.type === "payment") return { ...module, key: module.type, Icon, href: null };
-        const value = module.type === "call" ? (module.value || business.phone) : module.type === "email" ? (module.value || business.email) : module.value;
+        const value = module.type === "call" ? business.phone : module.type === "email" ? business.email : module.value;
         return { ...module, key: module.type, Icon, href: normalizeLink(module.type === "google_review" ? "google_review_url" : module.type, value) };
       }).filter((item) => (item.type === "menu" && menuAvailable) || (item.type === "payment" && (business.upi_id || business.payment_qr_url)) || item.href)
     : coreLinks.map(([key, label, Icon]) => ({ key, label, Icon, value: business[key], href: normalizeLink(key, business[key]), type: key }))
@@ -369,14 +379,11 @@ export default function Profile({ slug }) {
         <div className="menu-modal" role="dialog" aria-modal="true" aria-label={`${business.business_name} menu`} onClick={() => setMenuOpen(false)}>
           <div className="menu-modal-card" onClick={(event) => event.stopPropagation()}>
             <header className="menu-modal-header">
-              <div className="menu-modal-heading">
-                <span className="menu-modal-kicker">Menu</span>
-                <strong className="menu-modal-title">{business.business_name}</strong>
-              </div>
-              <button type="button" className="menu-close" onClick={() => setMenuOpen(false)} aria-label="Close menu"><FaTimes /></button>
+              <div><span>MENU</span><strong>{business.business_name}</strong></div>
+              <button className="menu-close" onClick={() => setMenuOpen(false)} aria-label="Close menu"><FaTimes /></button>
             </header>
             <div className="menu-image-wrap" onTouchStart={handleMenuTouchStart} onTouchEnd={handleMenuTouchEnd}>
-              <img className="menu-image" src={menuImages[menuIndex]} alt={`Menu page ${menuIndex + 1}`} />
+              <img src={menuImages[menuIndex]} alt={`Menu page ${menuIndex + 1}`} />
               {menuImages.length > 1 && (
                 <>
                   <button className="menu-nav menu-prev" onClick={previousMenu} aria-label="Previous menu page"><FaArrowLeft /></button>
