@@ -114,6 +114,22 @@ export function clearAdminToken() {
   sessionStorage.removeItem(AUTH_TOKEN_KEY);
 }
 
+export async function verifyHakiAdminToken(token) {
+  if (!supabaseConfigured || !token) return false;
+  const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/is_haki_admin`, {
+    method: "POST",
+    headers: {
+      apikey: SUPABASE_KEY,
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: "{}",
+    cache: "no-store",
+  });
+  if (!response.ok) return false;
+  return (await response.json()) === true;
+}
+
 export async function adminLogin(email, password) {
   if (!supabaseConfigured) throw new Error("Supabase is not configured.");
 
@@ -129,6 +145,17 @@ export async function adminLogin(email, password) {
   const data = await response.json();
   if (!response.ok || !data.access_token) {
     throw new Error(data.error_description || data.msg || "Login failed");
+  }
+
+  let isAdmin = false;
+  try {
+    isAdmin = await verifyHakiAdminToken(data.access_token);
+  } catch {
+    isAdmin = false;
+  }
+  if (!isAdmin) {
+    sessionStorage.removeItem(AUTH_TOKEN_KEY);
+    throw new Error("This account does not have Haki Owner Admin access. Please use the Restaurant Login page.");
   }
 
   sessionStorage.setItem(AUTH_TOKEN_KEY, data.access_token);
