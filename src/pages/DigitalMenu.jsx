@@ -8,8 +8,9 @@ const THEMES={
   "Cafe Rio":CAFE,
   "Classic Red":{bg:"#171717",panel:"#202020",panel2:"#292929",accent:"#e51b23",accent2:"#b80f17",cream:"#fff7ed",gold:"#f4c542",muted:"#bdbdbd"},
   "Emerald":{bg:"#10251e",panel:"#17352b",panel2:"#21483a",accent:"#43a56f",accent2:"#2c8053",cream:"#f4fff8",gold:"#d9c47a",muted:"#b6c8bd"},
-  "Midnight Gold":{bg:"#111318",panel:"#1b1e25",panel2:"#252a34",accent:"#d6aa45",accent2:"#aa7f24",cream:"#faf7ef",gold:"#f0c967",muted:"#b9b7b0"},
-  "Ocean":{bg:"#101e2a",panel:"#182b3a",panel2:"#233b4c",accent:"#168aad",accent2:"#126782",cream:"#f2fbff",gold:"#8ed8e8",muted:"#b4cbd5"}
+  "Midnight Gold":{bg:"#111318",panel:"#1b1e25",panel2:"#252a34",accent:"#d6aa45",accent2:"#aa7f24",cream:"#faf7ef",gold:"#f0c967",muted:"#b9b7b0",text:"#ffffff"},
+  "Ocean":{bg:"#101e2a",panel:"#182b3a",panel2:"#233b4c",accent:"#168aad",accent2:"#126782",cream:"#f2fbff",gold:"#8ed8e8",muted:"#b4cbd5",text:"#ffffff"},
+  "Classic Light":{bg:"#ffffff",panel:"#f5f5f5",panel2:"#ebebeb",accent:"#171717",accent2:"#000000",cream:"#171717",gold:"#171717",muted:"#666666",text:"#171717"}
 };
 const defaultHours=["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"].map(day=>({day,open:"10:30",close:"23:30",closed:false}));
 const fmtTime=value=>{if(!value)return "";const [h,m]=String(value).split(":").map(Number);const hour=h%12||12;return `${hour}:${String(m||0).padStart(2,"0")} ${h>=12?"PM":"AM"}`};
@@ -31,7 +32,7 @@ export default function DigitalMenu({businessSlug,menuSlug}){
  const gallery=Array.isArray(d.galleryImages)?d.galleryImages.filter(Boolean):[];
  const story=d.story||"";
  const detailDescription=d.restaurantDescription||[m.subtitle,""].filter(Boolean).join(" · ");
- const style={"--bg":theme.bg,"--panel":theme.panel,"--panel2":theme.panel2,"--red":theme.accent,"--red2":theme.accent2,"--cream":theme.cream,"--gold":theme.gold,"--muted":theme.muted,"--line":`${theme.accent}47`};
+ const style={"--bg":theme.bg,"--panel":theme.panel,"--panel2":theme.panel2,"--red":theme.accent,"--red2":theme.accent2,"--cream":theme.cream,"--gold":theme.gold,"--muted":theme.muted,"--text":theme.text||"#ffffff","--line":`${theme.accent}47`};
  const openMenu=()=>{setActiveCategory("all");setMenuOpen(true);trackEvent(m.business_id,"digital_menu_open").catch(()=>{})};
  const googleUrl=safeUrl(d.googleReviewUrl);
  const mapUrl=safeUrl(d.mapUrl);
@@ -43,7 +44,7 @@ export default function DigitalMenu({businessSlug,menuSlug}){
  return <main className="cafe-page-wrap" style={style}>
   <main className="cafe-page">
    {m.banner_url&&<section className="hero"><img src={m.banner_url} alt="Restaurant banner"/></section>}
-   <div className={`logo-card ${m.logo_url?"has-image":""} ${m.banner_url?"has-banner":"no-banner"}`}>{m.logo_url?<img className="uploaded-logo" src={m.logo_url} alt={`${m.title} logo`}/>:<div className="logo"><span>{d.logoTopText||""}</span>{d.logoMainText||d.restaurantName||data.business_name||m.title}<small>{d.logoBottomText||d.tagline||m.subtitle||""}</small></div>}</div>
+   <div className={`logo-card ${m.logo_url?"has-image":""}`}>{m.logo_url?<img className="uploaded-logo" src={m.logo_url} alt={`${m.title} logo`}/>:<div className="logo"><span>{d.logoTopText||""}</span>{d.logoMainText||d.restaurantName||data.business_name||m.title}<small>{d.logoBottomText||d.tagline||m.subtitle||""}</small></div>}</div>
    <div className="content">
     <h1>{welcomePrefix&&<>{welcomePrefix}<br/></>}{titleText}</h1>
     {(d.tagline||m.subtitle)&&<div className="tagline">{d.tagline||m.subtitle}</div>}

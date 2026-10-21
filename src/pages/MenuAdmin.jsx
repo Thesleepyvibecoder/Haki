@@ -9,7 +9,8 @@ const THEMES={
  "Cafe Rio":{bg:"#171717",panel:"#202020",panel2:"#292929",accent:"#e51b23",accent2:"#b80f17",cream:"#fff7ed",gold:"#f4c542"},
  "Classic Red":{bg:"#fff7f5",panel:"#fff",panel2:"#f9e7e4",accent:"#c62828",accent2:"#a51e1e",cream:"#30100d",gold:"#b67a00"},
  "Emerald":{bg:"#10251e",panel:"#17352b",panel2:"#21483a",accent:"#43a56f",accent2:"#2c8053",cream:"#f4fff8",gold:"#d9c47a"},
- "Midnight Gold":{bg:"#111318",panel:"#1b1e25",panel2:"#252a34",accent:"#d6aa45",accent2:"#aa7f24",cream:"#faf7ef",gold:"#f0c967"}
+ "Midnight Gold":{bg:"#111318",panel:"#1b1e25",panel2:"#252a34",accent:"#d6aa45",accent2:"#aa7f24",cream:"#faf7ef",gold:"#f0c967"},
+ "Classic Light":{bg:"#ffffff",panel:"#f5f5f5",panel2:"#ebebeb",accent:"#171717",accent2:"#000000",cream:"#171717",gold:"#171717"}
 };
 const EMPTY_MENU={id:"",slug:"",title:"",subtitle:"",logo_url:"",banner_url:"",theme:{preset:"Cafe Rio"},menu_data:{categories:[]},working_hours:EMPTY_HOURS,details:{tagline:"",story:"",address:"",mapUrl:"",instagramUrl:"",googleReviewUrl:"",galleryImages:[],welcomePrefix:"Welcome To",landingTitle:"",restaurantName:"",restaurantDescription:"",logoTopText:"",logoMainText:"",logoBottomText:"",viewMenuText:"▣  VIEW MENU",googleButtonText:"★  RATE US ON GOOGLE ↗",storyHeading:"THE RESTAURANT STORY",galleryHeading:"AMBIENCE & UPCOMING EVENTS",hoursHeading:"OPERATING HOURS",detailsHeading:"RESTAURANT DETAILS",footerText:"POWERED BY HAKI",modalTitle:"",modalSubtitle:""},is_active:true};
 function uid(){return crypto.randomUUID?.()||`${Date.now()}-${Math.random()}`}
