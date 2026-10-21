@@ -14,8 +14,8 @@
 .cafe-page h1{font-size:21px;line-height:1.3;text-align:center;color:var(--text,#fff);margin:19px 0 18px;font-weight:700}
 .cafe-page .tagline{text-align:center;color:var(--gold,#f4c542);font-size:10px;letter-spacing:3px;margin:-10px 0 20px}
 .cafe-page .btns{display:grid;gap:10px}
-.cafe-page .btn{width:100%;min-height:50px;border-radius:13px;border:1px solid rgba(255,255,255,.14);background:transparent;color:#fff;text-decoration:none;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;letter-spacing:.2px;padding:0 12px;cursor:pointer;font-family:inherit}
-.cafe-page .btn.primary{background:var(--red,#e51b23);border-color:var(--red,#e51b23)}
+.cafe-page .btn{width:100%;min-height:50px;border-radius:13px;border:1px solid color-mix(in srgb,var(--text,#fff) 22%,transparent);background:transparent;color:var(--text,#fff);text-decoration:none;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;letter-spacing:.2px;padding:0 12px;cursor:pointer;font-family:inherit}
+.cafe-page .btn.primary{background:var(--red,#e51b23);border-color:var(--red,#e51b23);color:#fff}
 .cafe-page .btn:hover{filter:brightness(1.08)}
 .cafe-page .section{margin-top:44px}
 .cafe-page .section-title{display:flex;align-items:center;gap:10px;color:var(--gold,#f4c542);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;white-space:nowrap}
