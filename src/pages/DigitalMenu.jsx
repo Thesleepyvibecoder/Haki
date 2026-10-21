@@ -43,7 +43,7 @@ export default function DigitalMenu({businessSlug,menuSlug}){
  return <main className="cafe-page-wrap" style={style}>
   <main className="cafe-page">
    {m.banner_url&&<section className="hero"><img src={m.banner_url} alt="Restaurant banner"/></section>}
-   <div className={`logo-card ${m.logo_url?"has-image":""}`}>{m.logo_url?<img className="uploaded-logo" src={m.logo_url} alt={`${m.title} logo`}/>:<div className="logo"><span>{d.logoTopText||""}</span>{d.logoMainText||d.restaurantName||data.business_name||m.title}<small>{d.logoBottomText||d.tagline||m.subtitle||""}</small></div>}</div>
+   <div className={`logo-card ${m.logo_url?"has-image":""} ${m.banner_url?"has-banner":"no-banner"}`}>{m.logo_url?<img className="uploaded-logo" src={m.logo_url} alt={`${m.title} logo`}/>:<div className="logo"><span>{d.logoTopText||""}</span>{d.logoMainText||d.restaurantName||data.business_name||m.title}<small>{d.logoBottomText||d.tagline||m.subtitle||""}</small></div>}</div>
    <div className="content">
     <h1>{welcomePrefix&&<>{welcomePrefix}<br/></>}{titleText}</h1>
     {(d.tagline||m.subtitle)&&<div className="tagline">{d.tagline||m.subtitle}</div>}
