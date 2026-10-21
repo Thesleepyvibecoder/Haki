@@ -5,7 +5,7 @@
 .cafe-page .hero img{width:100%;height:100%;object-fit:cover;display:block}
 .cafe-page .hero:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 42%,color-mix(in srgb,var(--bg,#171717) 96%,transparent) 100%);pointer-events:none}
 .cafe-page .logo-card{position:relative;width:126px;height:94px;margin:-49px auto 0;z-index:3;background:var(--panel,#202020);border:2px solid var(--red,#e51b23);border-radius:18px;display:flex;align-items:center;justify-content:center;text-align:center;box-shadow:0 10px 25px #0008;overflow:hidden}
-.cafe-page .logo-card.has-image{padding:0}
+.cafe-page .logo-card.has-image{padding:0;background:#171717}
 .cafe-page .uploaded-logo{width:100%;height:100%;object-fit:contain;display:block}
 .cafe-page .logo{font-family:Georgia,serif;font-weight:700;line-height:.9;color:var(--text,#fff);font-size:25px;max-width:100%;overflow-wrap:anywhere}
 .cafe-page .logo span{display:block;font-family:cursive;font-size:30px;color:#fff}
@@ -14,8 +14,8 @@
 .cafe-page h1{font-size:21px;line-height:1.3;text-align:center;color:var(--text,#fff);margin:19px 0 18px;font-weight:700}
 .cafe-page .tagline{text-align:center;color:var(--gold,#f4c542);font-size:10px;letter-spacing:3px;margin:-10px 0 20px}
 .cafe-page .btns{display:grid;gap:10px}
-.cafe-page .btn{width:100%;min-height:50px;border-radius:13px;border:1px solid color-mix(in srgb,var(--text,#fff) 22%,transparent);background:transparent;color:var(--text,#fff);text-decoration:none;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;letter-spacing:.2px;padding:0 12px;cursor:pointer;font-family:inherit}
-.cafe-page .btn.primary{background:var(--red,#e51b23);border-color:var(--red,#e51b23);color:#fff}
+.cafe-page .btn{width:100%;min-height:50px;border-radius:13px;border:1px solid rgba(255,255,255,.14);background:transparent;color:#fff;text-decoration:none;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;letter-spacing:.2px;padding:0 12px;cursor:pointer;font-family:inherit}
+.cafe-page .btn.primary{background:var(--red,#e51b23);border-color:var(--red,#e51b23)}
 .cafe-page .btn:hover{filter:brightness(1.08)}
 .cafe-page .section{margin-top:44px}
 .cafe-page .section-title{display:flex;align-items:center;gap:10px;color:var(--gold,#f4c542);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;white-space:nowrap}
