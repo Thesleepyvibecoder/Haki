@@ -65,3 +65,12 @@
 .cafe-state{width:min(100%,430px);margin:auto;padding:40px 24px;background:#171717;color:#fff;min-height:100vh}
 .cafe-state p{color:#bbb}
 @media(min-width:700px){.cafe-page-wrap{padding:25px 0}}
+
+
+/* Theme-safe secondary action (Google Review): keep it visible in Classic Light and all dark themes. */
+.cafe-page .btn:not(.primary){
+  color:var(--text,#fff);
+  border-color:color-mix(in srgb,var(--text,#fff) 24%,transparent);
+  background:transparent;
+}
+.cafe-page .btn:not(.primary):hover{filter:brightness(1.08)}
