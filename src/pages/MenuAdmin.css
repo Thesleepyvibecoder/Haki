@@ -60,3 +60,20 @@
     font-size: 13px;
   }
 }
+
+/* Operating hours controls: accessible animated switch and editable time fields */
+.hours-section-head{display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;margin-bottom:18px}
+.hours-section-head>div:first-child h2{margin-bottom:5px}
+.haki-switch{display:inline-flex!important;align-items:center;gap:10px;cursor:pointer;user-select:none;margin:0!important;position:relative}
+.haki-switch>input{position:absolute!important;opacity:0!important;width:1px!important;height:1px!important;overflow:hidden!important;clip-path:inset(50%)!important}
+.haki-switch-track{width:52px;height:30px;flex:0 0 52px;display:inline-flex;align-items:center;padding:3px;border-radius:999px;background:#b8bec7;transition:background .22s ease;box-shadow:inset 0 0 0 1px rgba(0,0,0,.08)}
+.haki-switch-thumb{width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.22);transform:translateX(0);transition:transform .22s cubic-bezier(.2,.8,.2,1)}
+.haki-switch input:checked+.haki-switch-track{background:#16834a}
+.haki-switch input:checked+.haki-switch-track .haki-switch-thumb{transform:translateX(22px)}
+.haki-switch input:focus-visible+.haki-switch-track{outline:3px solid rgba(22,131,74,.25);outline-offset:3px}
+.haki-switch-label{font-size:13px;font-weight:600;color:#344054;min-width:145px}
+.hours-admin-row input[type=text]{min-width:0;width:100%;padding:10px 12px;border:1px solid #d5dbe3;border-radius:10px;background:#fff;color:#101828;font:inherit;box-sizing:border-box}
+.hours-admin-row input[type=text]:focus{outline:2px solid rgba(22,131,74,.18);border-color:#16834a}
+.hours-admin-row input[type=text]:disabled{background:#f3f4f6;color:#98a2b3;cursor:not-allowed}
+.hours-time-help{font-size:12px;color:#667085;margin:12px 0 0}
+@media(max-width:560px){.hours-section-head{align-items:flex-start;flex-direction:column;gap:14px}.haki-switch-label{min-width:0}}
