@@ -97,10 +97,10 @@ export async function trackEvent(businessId, eventType) {
   });
 }
 
-export async function getAnalyticsByToken(token) {
+export async function getAnalyticsByToken(token, days = 7) {
   return supabaseFetch("/rpc/get_business_analytics", {
     method: "POST",
-    body: JSON.stringify({ p_token: token }),
+    body: JSON.stringify({ p_token: token, p_days: Number(days) }),
   });
 }
 
